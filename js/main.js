@@ -24,7 +24,10 @@ Vue.component('product-tabs', {
          <product-review></product-review>
        </div>
         <div v-show="selectedTab === 'Shipping'">
-            <p>Shipping: {{ shipping }}</p>
+            <p>Shipping: 
+                <span v-if="shipping === 0">Free</span>
+                <span v-else>{{ shipping }}</span>
+            </p>
         </div>
         <div v-show="selectedTab === 'Details'">
             <product-details :details="details"></product-details>
@@ -104,7 +107,8 @@ Vue.component('product-review', {
         
         </form>
 
-    `, data() {
+    `, 
+    data() {
         return {
             name: null,
             review: null,
@@ -180,6 +184,9 @@ Vue.component('product', {
 <!--            <div v-for="size in sizes">-->
 <!--                <p>{{ size }}</p>-->
 <!--            </div>-->
+            <div>
+                <p>Price: {{ variants[selectedVariant].variantPrice }}</p>
+            </div>
             <button v-on:click="addToCart"
                     :disabled="!inStock"
                     :class="{ disabledButton: !inStock }"
@@ -204,7 +211,8 @@ Vue.component('product', {
         premium: {
             type: Boolean, required: true
         }
-    }, data() {
+    }, 
+    data() {
         return {
             product: "Socks",
             brand: "Vue Mastery",
@@ -219,18 +227,21 @@ Vue.component('product', {
                 variantId: 2234,
                 variantColor: 'green',
                 variantImage: "./assets/vmSocks-green-onWhite.jpg",
-                variantQuantity: 10
+                variantQuantity: 10,
+                variantPrice: 12,
             }, {
                 variantId: 2235,
                 variantColor: 'blue',
                 variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                variantQuantity: 5
+                variantQuantity: 5,
+                variantPrice: 16,
             }], // sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
             reviews: []
         }
-    }, methods: {
+    }, 
+    methods: {
         addToCart() {
-            this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId);
+            this.$emit('add-to-cart', this.variants[this.selectedVariant], this.shipping);
         }, removeFromCart() {
             this.$emit('remove-from-cart', this.variants[this.selectedVariant].variantId);
         }, updateProduct(index) {
@@ -238,7 +249,8 @@ Vue.component('product', {
             console.log(index);
         },
 
-    }, computed: {
+    }, 
+    computed: {
         title() {
             return this.brand + ' ' + this.product;
         }, image() {
@@ -249,11 +261,11 @@ Vue.component('product', {
             return this.brand + ' ' + this.product + ' ' + (["not on sale", "on sale!"])[Number(this.onSale)];
         }, shipping() {
             if (this.premium) {
-                return "Free"
+                return 0;
             } else {
-                return 2.99
+                return 2.99;
             }
-        },
+        }
     },
     mounted() {
         eventBus.$on('review-submitted', productReview => {
@@ -267,10 +279,29 @@ let app = new Vue({
     el: "#app", data: {
         premium: false, cart: [],
     }, methods: {
-        updateCart(id) {
-            this.cart.push(id);
+        updateCart(productVariant, shipping) {
+            for (currentCart of this.cart) {
+                if (currentCart["productVariant"].variantId === productVariant.variantId) {
+                    currentCart.quantity++;
+                    return;
+                }
+            }
+            this.cart.push({
+                productVariant: productVariant,
+                shipping: shipping,
+                quantity: 1
+            });
         }, removeFromCart(id) {
             this.cart.pop(this.cart.findIndex(idElem => idElem !== id));
+        },
+    },
+    computed: {
+        price() {
+            let price = 0;
+            for (let cart of this.cart) {
+                price += Number(((cart.quantity - Math.trunc(cart.quantity/3)) * cart["productVariant"].variantPrice + cart.shipping).toFixed(2));
+            }
+            return price;
         }
     }
 })
