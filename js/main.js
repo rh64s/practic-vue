@@ -1,4 +1,4 @@
-// let eventBus = new Vue()
+let eventBus = new Vue()
 Vue.component('product-tabs', {
     template: `
     <div>   
@@ -21,7 +21,7 @@ Vue.component('product-tabs', {
          </ul>
        </div>
        <div v-show="selectedTab === 'Make a Review'">
-         <product-review @review-submitted="addReview"></product-review>
+         <product-review></product-review>
        </div>
      </div>
 
@@ -37,11 +37,6 @@ Vue.component('product-tabs', {
             type: Array,
             required: false
         }
-    },
-    methods: {
-        addReview(productReview) {
-            this.reviews.push(productReview)
-        },
     }
 })
 
@@ -113,7 +108,7 @@ Vue.component('product-review', {
                     rating: this.rating,
                     recommend: this.recommend
                 }
-                this.$emit('review-submitted', productReview)
+                eventBus.$emit('review-submitted', productReview)
                 this.name = null
                 this.review = null
                 this.rating = null
@@ -247,7 +242,13 @@ Vue.component('product', {
                 return 2.99
             }
         },
-    }
+    },
+    mounted() {
+        eventBus.$on('review-submitted', productReview => {
+            this.reviews.push(productReview)
+        })
+    },
+
 })
 
 let app = new Vue({
