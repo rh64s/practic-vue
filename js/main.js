@@ -48,7 +48,8 @@ Vue.component('product-tabs', {
             required: false
         },
         shipping: {
-            
+            type: String,
+            required: true
         }
     }
 })
