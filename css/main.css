@@ -91,3 +91,13 @@ textarea {
 .textLineThrough {
     text-decoration: line-through;
 }
+
+.input-radio-line {
+    display: flex;
+    flex-direction: row;
+    gap: 10px
+}
+
+.input-radio-line > input {
+    width: 20px;
+}

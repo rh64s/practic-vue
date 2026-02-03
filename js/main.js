@@ -5,6 +5,13 @@ Vue.component('product-review', {
            <label for="name">Name:</label>
            <input id="name" v-model="name" placeholder="name">
          </p>
+         
+         <p v-if="errors.length">
+             <b>Please correct the following error(s):</b>
+             <ul>
+                <li v-for="error in errors">{{ error }}</li>
+             </ul>
+         </p>
         
          <p>
            <label for="review">Review:</label>
@@ -12,16 +19,29 @@ Vue.component('product-review', {
          </p>
         
          <p>
-           <label for="rating">Rating:</label>
-           <select id="rating" v-model.number="rating">
-             <option>5</option>
-             <option>4</option>
-             <option>3</option>
-             <option>2</option>
-             <option>1</option>
-           </select>
+            <label for="rating">Rating:</label>
+            <select id="rating" v-model.number="rating">
+                <option>5</option>
+                <option>4</option>
+                <option>3</option>
+                <option>2</option>
+                <option>1</option>
+            </select>
          </p>
-        
+         
+         <fieldset>
+            <legend>Would you recommend this product?</legend> 
+            <div class="input-radio-line">
+                <input type="radio" value="yes" id="recommend_yes" name="recommend" v-model="recommend">
+                <label for="recommend_yes">yes</label>
+            </div>
+            <div class="input-radio-line">
+                <input type="radio" value="no" id="recommend_no" name="recommend" v-model="recommend">
+                <label for="recommend_no">no</label>
+            </div>
+            
+        </fieldset>
+
          <p>
            <input type="submit" value="Submit"> 
          </p>
@@ -33,20 +53,31 @@ Vue.component('product-review', {
             name: null,
             review: null,
             rating: null,
-            errors: null,
+            recommend: null,
+            errors: [],
         }
     },
     methods: {
         onSubmit() {
-            let productReview = {
-                name: this.name,
-                review: this.review,
-                rating: this.rating,
-            };
-            this.$emit('review-submitted', productReview)
-            this.name = null;
-            this.review = null;
-            this.rating = null;
+            if(this.name && this.review && this.rating) {
+                let productReview = {
+                    name: this.name,
+                    review: this.review,
+                    rating: this.rating,
+                    recommend: this.recommend
+                }
+                this.$emit('review-submitted', productReview)
+                this.name = null
+                this.review = null
+                this.rating = null
+                this.errors = []
+                this.recommend = null
+            } else {
+                if(!this.name) this.errors.push("Name required.")
+                if(!this.review) this.errors.push("Review required.")
+                if(!this.rating) this.errors.push("Rating required.")
+                if(!this.recommend) this.errors.push("Recommend required.")
+            }
         }
     }
 })
@@ -119,6 +150,7 @@ Vue.component('product', {
                         <p>{{ review.name }}</p>
                         <p>Rating: {{ review.rating }}</p>
                         <p>{{ review.review }}</p>
+                        <p>Recommend: {{ review.recommend }}</p>
                     </li>
                 </ul>
             </div>
