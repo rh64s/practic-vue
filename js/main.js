@@ -1,3 +1,20 @@
+Vue.component('product-details', {
+    template: `
+    <div>
+        <p>Детали:</p>
+        <ul>
+            <li v-for="detail in details">{{ detail }}</li>
+        </ul>
+    </div>
+    `,
+    props: {
+        details: {
+            type: Array,
+            required: true
+        }
+    }
+})
+
 Vue.component('product', {
     template: `
     <div class="product">
@@ -14,9 +31,8 @@ Vue.component('product', {
             <!--            <p v-show="inStock">In Stock</p>-->
             <!--            <span v-show="onSale">On sale!</span>-->
             <span>{{ sale }}</span>
-            <ul>
-                <li v-for="detail in details">{{ detail }}</li>
-            </ul>
+            <p>Shipping: {{ shipping }}</p>
+            <product-details :details="details"></product-details>
             <div
                     class="color-box"
                     v-for="(variant, index) in variants"
@@ -37,7 +53,7 @@ Vue.component('product', {
             >
                 Add to cart
             </button>
-            <button v-on:click="addToCart"
+            <button v-on:click="removeFromCart"
                     :disabled="!inStock"
                     :class="{ disabledButton: !inStock }"
             >
@@ -48,6 +64,12 @@ Vue.component('product', {
         </div>
    </div>
     `,
+    props: {
+        premium: {
+            type:Boolean,
+            required:true
+        }
+    },
     data() {
         return {
             product: "Socks",
@@ -101,7 +123,14 @@ Vue.component('product', {
         },
         sale() {
             return this.brand + ' ' + this.product + ' ' + (["not on sale", "on sale!"])[Number(this.onSale)];
-        }
+        },
+        shipping() {
+            if (this.premium) {
+                return "Free"
+            } else {
+                return 2.99
+            }
+        },
     }
 })
 
