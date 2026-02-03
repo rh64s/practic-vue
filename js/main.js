@@ -115,7 +115,8 @@ Vue.component('product-review', {
     },
     methods: {
         onSubmit() {
-            if(this.name && this.review && this.rating) {
+            this.errors = []
+            if(this.name && this.review && this.rating && this.recommend) {
                 let productReview = {
                     name: this.name,
                     review: this.review,
@@ -126,7 +127,6 @@ Vue.component('product-review', {
                 this.name = null
                 this.review = null
                 this.rating = null
-                this.errors = []
                 this.recommend = null
             } else {
                 if(!this.name) this.errors.push("Name required.")
@@ -224,7 +224,7 @@ Vue.component('product', {
                 variantId: 2235,
                 variantColor: 'blue',
                 variantImage: "./assets/vmSocks-blue-onWhite.jpg",
-                variantQuantity: 0
+                variantQuantity: 5
             }], // sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
             reviews: []
         }
