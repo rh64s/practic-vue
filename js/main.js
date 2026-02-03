@@ -16,19 +16,25 @@ Vue.component('product-tabs', {
            <p>{{ review.name }}</p>
            <p>Rating: {{ review.rating }}</p>
            <p>{{ review.review }}</p>
-           <p>Recommend: { review.recommend }}</p>
+           <p>Recommend: {{ review.recommend }}</p>
            </li>
          </ul>
        </div>
        <div v-show="selectedTab === 'Make a Review'">
          <product-review></product-review>
        </div>
+        <div v-show="selectedTab === 'Shipping'">
+            <p>Shipping: {{ shipping }}</p>
+        </div>
+        <div v-show="selectedTab === 'Details'">
+            <product-details :details="details"></product-details>
+        </div>
      </div>
 
 `,
     data() {
         return {
-            tabs: ['Reviews', 'Make a Review'],
+            tabs: ['Reviews', 'Make a Review', 'Shipping', 'Details'],
             selectedTab: 'Reviews'
         }
     },
@@ -36,6 +42,13 @@ Vue.component('product-tabs', {
         reviews: {
             type: Array,
             required: false
+        },
+        details: {
+            type: Array,
+            required: false
+        },
+        shipping: {
+            
         }
     }
 })
@@ -155,8 +168,6 @@ Vue.component('product', {
             <!--            <p v-show="inStock">In Stock</p>-->
             <!--            <span v-show="onSale">On sale!</span>-->
             <span>{{ sale }}</span>
-            <p>Shipping: {{ shipping }}</p>
-            <product-details :details="details"></product-details>
             <div
                     class="color-box"
                     v-for="(variant, index) in variants"
@@ -184,7 +195,7 @@ Vue.component('product', {
             <hr>
             
             <a :href="link">More products like this</a>
-            <product-tabs :reviews="reviews"></product-tabs>
+            <product-tabs :reviews="reviews" :details="details" :shipping="shipping"></product-tabs>
             
         </div>        
    </div>
@@ -253,7 +264,7 @@ Vue.component('product', {
 
 let app = new Vue({
     el: "#app", data: {
-        premium: true, cart: [],
+        premium: false, cart: [],
     }, methods: {
         updateCart(id) {
             this.cart.push(id);
