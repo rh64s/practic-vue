@@ -115,7 +115,6 @@ Vue.component('product-review', {
             rating: null,
             recommend: null,
             errors: [],
-            commentTemp: {},
         }
     },
     methods: {
@@ -128,10 +127,10 @@ Vue.component('product-review', {
                     rating: this.rating,
                     recommend: this.recommend
                 }
-                this.commentTemp = (JSON.parse(localStorage.getItem('reviews')) || [])
-                this.commentTemp.push(productReview)
-                localStorage.setItem('reviews', JSON.stringify(this.commentTemp))
-                eventBus.$emit('review-submitted', this.commentTemp)
+                let commentTemp = localStorage.getItem('reviews') ?  JSON.parse(localStorage.getItem('reviews')) : [];
+                commentTemp.push(productReview)
+                localStorage.setItem('reviews', JSON.stringify(commentTemp))
+                eventBus.$emit('review-submitted', commentTemp)
                 this.name = null
                 this.review = null
                 this.rating = null
