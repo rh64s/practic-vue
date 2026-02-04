@@ -115,6 +115,7 @@ Vue.component('product-review', {
             rating: null,
             recommend: null,
             errors: [],
+            commentTemp: {},
         }
     },
     methods: {
@@ -127,7 +128,10 @@ Vue.component('product-review', {
                     rating: this.rating,
                     recommend: this.recommend
                 }
-                eventBus.$emit('review-submitted', productReview)
+                this.commentTemp = (JSON.parse(localStorage.getItem('reviews')) || [])
+                this.commentTemp.push(productReview)
+                localStorage.setItem('reviews', JSON.stringify(this.commentTemp))
+                eventBus.$emit('review-submitted', this.commentTemp)
                 this.name = null
                 this.review = null
                 this.rating = null
@@ -268,8 +272,9 @@ Vue.component('product', {
         }
     },
     mounted() {
-        eventBus.$on('review-submitted', productReview => {
-            this.reviews.push(productReview)
+        this.reviews = localStorage.getItem('reviews') ? JSON.parse(localStorage.getItem('reviews')) : [];
+        eventBus.$on('review-submitted', comments => {
+            this.reviews = comments;
         })
     },
 
@@ -299,9 +304,9 @@ let app = new Vue({
         price() {
             let price = 0;
             for (let cart of this.cart) {
-                price += Number(((cart.quantity - Math.trunc(cart.quantity/3)) * cart["productVariant"].variantPrice + cart.shipping).toFixed(2));
+                price += ((cart.quantity - Math.trunc(cart.quantity/3)) * cart["productVariant"].variantPrice + cart.shipping);
             }
-            return price;
+            return price.toFixed(2);
         }
     }
 })
