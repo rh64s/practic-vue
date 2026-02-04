@@ -306,6 +306,13 @@ let app = new Vue({
                 price += ((cart.quantity - Math.trunc(cart.quantity/3)) * cart["productVariant"].variantPrice + cart.shipping);
             }
             return price.toFixed(2);
+        },
+        cartLength() {
+            let length = 0;
+            for (let cart of this.cart) {
+                length += cart.quantity;
+            }
+            return length;
         }
     }
 })

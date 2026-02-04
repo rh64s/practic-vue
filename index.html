@@ -13,7 +13,7 @@
 <body>
 <div id="app">
     <div class="cart">
-        <p>In cart: {{cart.length}}</p>
+        <p>In cart: {{cartLength}}</p>
         <p>Price: {{price}}</p>
     </div>
     <product :premium="premium" @add-to-cart="updateCart" @remove-from-cart="removeFromCart"></product>
