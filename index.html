@@ -12,6 +12,10 @@
 <body>
     <h1>Todo list</h1>
     <div id="app">
+        <div class="todo-body">
+            <column v-for="(column, index) in columns" :max="column.max" :name="column.name" :cards="cardsss[index]"></column>
+        </div>
+
     </div>
 </body>
 </html>
