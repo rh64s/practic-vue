@@ -29,7 +29,7 @@ Vue.component('card', {
             required: true
         },
         name: {
-            String,
+            type: String,
             required: true
         },
         tasks: {
@@ -117,7 +117,7 @@ let app = new Vue({
         }
     },
     computed: {
-        cards() {
+        cardsToColumn() {
             return this.columns.map((column, index) => {
                 return this.cards.filter(card => card.columnNum === index)
             })
