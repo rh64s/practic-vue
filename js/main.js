@@ -13,11 +13,14 @@ Vue.component('task', {
     template: `
     <div class="task">
         <p>{{ task.description }}</p>
+        <label>
+            <input type="checkbox" v-model="task.isChecked" v-on:change="sendTaskStatus">
+        </label>
     </div>
     `,
     methods: {
-        changeTask() {
-            eventBus.$emit('changeTask', this.task, this.index);
+        sendTaskStatus() {
+            this.$emit('sendTaskStatus', this.task, this.index);
         },
     },
 })
@@ -33,8 +36,10 @@ Vue.component('card', {
             required: true
         },
         tasks: {
-            Array,
-            required: true
+            type: Array,
+            required: true,
+            min: 3,
+            max: 5,
         },
     },
     template: `
@@ -42,10 +47,16 @@ Vue.component('card', {
             <p>{{ this.name }}</p>
             <div class="card-task">
                 <task v-for="(task, index) in tasks" 
-                        :task="task" :index="index"></task>
+                        :task="task" :index="index"
+                        @sendTaskStatus="sendTaskStatus"></task>
             </div>
         </div>
     `,
+    methods: {
+        sendTaskStatus(task, taskIndex) {
+            eventBus.$emit('changeTaskStatus', this.index, task, taskIndex);
+        }
+    }
 })
 
 Vue.component('column', {
@@ -98,6 +109,18 @@ let app = new Vue({
                         "description": "asdasd",
                         "isChecked": false,
                     },
+                    {
+                        "description": "asdasd",
+                        "isChecked": false,
+                    },
+                    {
+                        "description": "asdasd",
+                        "isChecked": false,
+                    },
+                    {
+                        "description": "asdasd",
+                        "isChecked": false,
+                    },
                 ],
                 columnNum: 0,
             },
@@ -123,4 +146,9 @@ let app = new Vue({
             })
         }
     },
+    mounted() {
+        eventBus.$on('changeTaskStatus', function (cardIndex, task, taskIndex) {
+            console.log("ага", task.isChecked, taskIndex);
+        })
+    }
 })
