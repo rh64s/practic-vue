@@ -8,21 +8,18 @@ Vue.component('task', {
         index: {
             type: Number,
             required: true
-        }
+        },
     },
     template: `
     <div class="task">
-        <p>{{ this.task.description }}</p>
-        <label>
-            <input type="checkbox" v-model="isChecked" v-on:change="changeTask">
-        </label>
+        <p>{{ task.description }}</p>
     </div>
     `,
     methods: {
         changeTask() {
-            this.$emit('changeTask', this.task, this.index);
-        }
-    }
+            eventBus.$emit('changeTask', this.task, this.index);
+        },
+    },
 })
 
 Vue.component('card', {
@@ -44,15 +41,11 @@ Vue.component('card', {
         <div class="card">
             <p>{{ this.name }}</p>
             <div class="card-task">
-                <task class="card-task-text" v-for="(task, index) in tasks" :task="task" :index="index" @changeTask="changeTask"></task>
+                <task v-for="(task, index) in tasks" 
+                        :task="task" :index="index"></task>
             </div>
         </div>
     `,
-    methods: {
-        changeTask() {
-            
-        },
-    }
 })
 
 Vue.component('column', {
@@ -71,16 +64,13 @@ Vue.component('column', {
             required: true,
             default: []
         },
-        
     },
     template: `
         <div class="column">
             <p class="column-title">{{ this.name }}</p>
-            <card v-for="card in cards" :name="card.name" :tasks="card.tasks"></card>
+            <card v-for="(card, index) in cards" :index="index" :name="card.name" :tasks="card.tasks"></card>
         </div>
     `,
-    
-
 });
 
 let app = new Vue({
@@ -107,10 +97,10 @@ let app = new Vue({
                     {
                         "description": "asdasd",
                         "isChecked": false,
-                    }
+                    },
                 ],
-                columnNum: 0
-            }
+                columnNum: 0,
+            },
         ],
     },
     methods: {
@@ -119,17 +109,18 @@ let app = new Vue({
                 name: "Card",
                 tasks: [
                     {
-                        "description": "asdasd"
+                        "description": "asdasd",
+                        "isChecked": false,
                     }
                 ],
             })
         }
     },
     computed: {
-        cardsss() {
+        cards() {
             return this.columns.map((column, index) => {
                 return this.cards.filter(card => card.columnNum === index)
             })
         }
-    }
+    },
 })

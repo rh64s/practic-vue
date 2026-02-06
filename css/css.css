@@ -49,7 +49,6 @@
     padding: 10px;
 }
 .card-task {
-    content: "";
     border-left: 4px solid gray;
     padding: 2px;
     padding-left: 10px;
