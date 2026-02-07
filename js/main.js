@@ -142,7 +142,7 @@ Vue.component('column', {
     template: `
         <div class="column">
             <p class="column-title">{{ this.name }}</p>
-            <card v-for="card in cards" :index="card.id" :name="card.name" :tasks="card.tasks"></card>
+            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks"></card>
         </div>
     `,
 });
@@ -169,7 +169,7 @@ let app = new Vue({
     },
     methods: {
         addCart(name, tasks) {
-            console.log(name, tasks)
+            let allCards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
             this.cards.push({
                 id: this.nextId++,
                 name: name,
@@ -191,6 +191,9 @@ let app = new Vue({
                     return card.columnNum === index;
                 })
             })
+        },
+        cardsInStorage() {
+
         }
     },
     mounted() {
