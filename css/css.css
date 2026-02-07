@@ -117,3 +117,11 @@ button:hover {
 .isvisible {
     display: none;
 }
+.form-group, .form-task {
+    display: flex;
+    flex-direction: column;
+}
+input[type=text] {
+    padding: 10px;
+    font-size: 20px;
+}

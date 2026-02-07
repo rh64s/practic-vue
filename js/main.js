@@ -5,7 +5,9 @@ Vue.component('createTask', {
         return {
             name: "",
             tasks: [],
-            isDisabled: true
+            isDisabled: true,
+            errors: [
+            ]
         }
     },
     template: `
@@ -16,16 +18,18 @@ Vue.component('createTask', {
         <form class="form-create-task" @submit.prevent="addCart">
             <div class="form-group">
                 <label for="form-cart-name">Название</label>
-                <input id="form-cart-name" type="text" v-model="name">
+                <input id="form-cart-name" type="text" v-model="name" placeholder="Введите название">
             </div>
             <button type="button" class="button-second" v-on:click="addTask">Добавить задание</button>
             <div class="form-group">
                 <div class="form-task" v-for="(task, index) in tasks">
-                    <label>Задание {{index}}</label>
-                    <input type="text" v-model="tasks[index].description">
+                    <label>Задание {{index+1}}</label>
+                    <input type="text" v-model="tasks[index].description" placeholder="Введите описание задачи">
                 </div>
             </div>
-            
+            <div class="form-error" v-for="textError in errors">
+                <p>{{textError}}</p>
+            </div>
             <button type="submit" class="button-create" v-on:click="changeVisibility">Создать карточку</button>
         </form>
     </div>
@@ -41,7 +45,7 @@ Vue.component('createTask', {
         },
         addTask() {
             this.tasks.push({
-                "description": "пример слова",
+                "description": "",
                 "isChecked": false,
             })
         },
@@ -170,17 +174,20 @@ let app = new Vue({
     methods: {
         addCart(name, tasks) {
             let allCards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
-            this.cards.push({
-                id: this.nextId++,
+            let nextId = JSON.parse(localStorage.getItem("index") || 0);
+            allCards.push({
+                id: nextId++,
                 name: name,
                 tasks: tasks,
                 columnNum: 0,
             })
+            localStorage.setItem("index", JSON.stringify(nextId));
+            localStorage.setItem("cards", JSON.stringify(allCards));
+            this.cards = allCards;
         },
-        
         checkCard(cardIndex, completedPercent) {
-            console.log(cardIndex, completedPercent);
             this.cards[cardIndex].columnNum = Math.floor(completedPercent / 50);
+            localStorage.setItem("cards", JSON.stringify(this.cards));
         }
         
     },
@@ -192,14 +199,12 @@ let app = new Vue({
                 })
             })
         },
-        cardsInStorage() {
-
-        }
     },
     mounted() {
         this.cards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
         let checkCard = this.checkCard.bind(this);
         eventBus.$on('changeTaskStatus', function (cardIndex, completedPercent) {
+            
             checkCard(cardIndex, completedPercent);
         });
     },
