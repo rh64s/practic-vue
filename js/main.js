@@ -30,26 +30,52 @@ Vue.component('createTask', {
             <div class="form-error" v-for="textError in errors">
                 <p>{{textError}}</p>
             </div>
-            <button type="submit" class="button-create" v-on:click="changeVisibility">Создать карточку</button>
+            <button type="submit" class="button-create">Создать карточку</button>
         </form>
     </div>
 </div>
     `,
     methods: {
         addCart() {
-            console.log(this.name)
-            console.log(this.tasks.length)
-            this.$emit('add-cart', this.name, this.tasks);
-            this.name = ""
-            this.tasks = []
+            this.errors = [];
+            let hasEmptyTask = false
+            for (let task of this.tasks) {
+                if (!task.description) {
+                    hasEmptyTask = true
+                }
+            }
+            if(this.name && (this.tasks.length >= 3 && this.tasks.length <= 5) && !hasEmptyTask) {
+                this.$emit('add-cart', this.name, this.tasks);
+                this.name = ""
+                this.tasks = []
+                this.isDisabled = true;
+                return
+            }
+            if(hasEmptyTask) {
+                this.errors.push("В задаче должен быть текст!")
+            }
+            if(!(this.tasks.length >= 3 && this.tasks.length <= 5)){
+                this.errors.push("Количество задач должно быть от 3 до 5 (включительно)!")
+            }
+            if(!this.name) {
+                this.errors.push("Введите название карточки")
+            }
         },
         addTask() {
+            if(this.tasks.length === 5){
+                this.errors = []
+                this.errors.push("Вы не можете добавить больше 5 задач")
+                return
+            }
             this.tasks.push({
                 "description": "",
                 "isChecked": false,
             })
         },
         changeVisibility() {
+            this.name = ""
+            this.tasks = []
+            this.errors = []
             this.isDisabled = !this.isDisabled
         }
     },
