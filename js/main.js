@@ -66,7 +66,7 @@ Vue.component('task', {
     <div class="task">
         <p>{{ task.description }}</p>
         <label>
-            <input type="checkbox" v-model="task.isChecked" v-on:click="sendTaskStatus">
+            <input type="checkbox" v-model="task.isChecked" v-on:change="sendTaskStatus">
         </label>
     </div>
     `,
