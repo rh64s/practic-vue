@@ -12,11 +12,11 @@
 <body>
     <div id="app">
         <h1>Todo list</h1>
-        <create-task @add-cart="addCart"></create-task>
+        <create-task :is-locked="isLocked" @add-cart="addCart"></create-task>
 
         <div class="flex-centered">
             <div class="todo-body">
-                <column v-for="(column, index) in columns" :max="column.max" :name="column.name" :cards="cardsToColumn[index]"></column>
+                <column v-for="(column, index) in columns" :max="column.max" :name="column.name" :is-locked="column.isColumnLocked" :is-redaction-locked="column.isRedactionLocked" :cards="cardsToColumn[index]"></column>
             </div>
         </div>
     </div>

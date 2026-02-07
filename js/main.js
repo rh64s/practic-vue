@@ -10,12 +10,17 @@ Vue.component('createTask', {
             ]
         }
     },
+    props: {
+        isLocked: {
+            type: Boolean,
+        }
+    },
     template: `
 <div>
-    <button type="submit" class="button-create" v-on:click="changeVisibility">Создать карточку</button>
+    <button type="submit" class="button-create"  v-bind:class="{buttonLocked: isLocked}" v-on:click="changeVisibility">Создать карточку</button>
     <div class="modal" v-bind:class="{ isvisible: isDisabled }">
         <div class="modal-background" v-on:click="changeVisibility"></div>
-        <form class="form-create-task" @submit.prevent="addCart">
+        <form v-if="isLocked === false" class="form-create-task" @submit.prevent="addCart">
             <div class="form-group">
                 <label for="form-cart-name">Название</label>
                 <input id="form-cart-name" type="text" v-model="name" placeholder="Введите название">
@@ -32,6 +37,9 @@ Vue.component('createTask', {
             </div>
             <button type="submit" class="button-create">Создать карточку</button>
         </form>
+        <div v-else class="form-create-task">
+            <p>Вы не можете добавить больше 3 карточек</p>
+        </div>
     </div>
 </div>
     `,
@@ -91,12 +99,16 @@ Vue.component('task', {
             type: Number,
             required: true
         },
+        isLocked: {
+            type: Boolean,
+            default: false
+        }
     },
     template: `
     <div class="task">
         <p>{{ task.description }}</p>
         <label>
-            <input type="checkbox" v-model="task.isChecked" v-on:change="sendTaskStatus">
+            <input type="checkbox" v-model="task.isChecked" v-on:change="sendTaskStatus" :disabled="isLocked">
         </label>
     </div>
     `,
@@ -123,13 +135,16 @@ Vue.component('card', {
             min: 3,
             max: 5,
         },
+        isLocked: {
+            type: Boolean,
+        }
     },
     template: `
         <div class="card">
             <p>{{ this.name }}, index = {{ this.index }}</p>
             <div class="card-task">
                 <task v-for="(task, index) in tasks" 
-                        :task="task" :index="index"
+                        :task="task" :index="index" :is-locked="isLocked"
                         @sendTaskStatus="sendTaskStatus"></task>
             </div>
         </div>
@@ -168,11 +183,15 @@ Vue.component('column', {
             required: true,
             default: []
         },
+        isRedactionLocked: {
+            type: Boolean,
+            default: false
+        }
     },
     template: `
-        <div class="column">
+        <div class="column"">
             <p class="column-title">{{ this.name }}</p>
-            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks"></card>
+            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks" :is-locked="isRedactionLocked"></card>
         </div>
     `,
 });
@@ -185,6 +204,7 @@ let app = new Vue({
             {
                 max: 3,
                 name: "Первый столбец",
+                isRedactionLocked: false
             },
             {
                 max: 5,
@@ -193,6 +213,7 @@ let app = new Vue({
             {
                 max: 0,
                 name: "Третий столбец",
+                isRedactionLocked: true
             },
         ],
         cards: [],
@@ -212,8 +233,11 @@ let app = new Vue({
             this.cards = allCards;
         },
         checkCard(cardIndex, completedPercent) {
-            this.cards[cardIndex].columnNum = Math.floor(completedPercent / 50);
+            let currentCard = this.cards[cardIndex];
+            let targetIndex = Math.floor(completedPercent / 50);
+            currentCard.columnNum = targetIndex;
             localStorage.setItem("cards", JSON.stringify(this.cards));
+            this.cards = [...this.cards];
         }
         
     },
@@ -225,12 +249,22 @@ let app = new Vue({
                 })
             })
         },
+        isLocked() {
+            this.cards = [...this.cards];
+            let doLock = !(this.cards.filter(card => card.columnNum === 0).length < this.columns[0].max)
+            this.columns[0].isLocked = doLock;
+            return doLock
+        },
+        isFirstColumnLocked() {
+            this.cards = [...this.cards];
+            let doLock = !(this.cards.filter(card => card.columnNum === 0).length < this.columns[1].max)
+            this.columns[0].isLocked = doLock;
+        }
     },
     mounted() {
         this.cards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
         let checkCard = this.checkCard.bind(this);
         eventBus.$on('changeTaskStatus', function (cardIndex, completedPercent) {
-            
             checkCard(cardIndex, completedPercent);
         });
     },
