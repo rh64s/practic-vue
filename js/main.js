@@ -121,37 +121,38 @@ Vue.component('task', {
 
 Vue.component('card', {
     props: {
-        // index: {
-        //     type: Number,
-        //     required: true
-        // },
-        // name: {
-        //     type: String,
-        //     required: true
-        // },
-        // tasks: {
-        //     type: Array,
-        //     required: true,
-        //     min: 3,
-        //     max: 5,
-        // },
-        card: {
-            type: Object,
+        index: {
+            type: Number,
             required: true
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        tasks: {
+            type: Array,
+            required: true,
+            min: 3,
+            max: 5,
         },
         isLocked: {
             type: Boolean,
+        },
+        whenCompleted: {
+            type: String,
+            required: false
         }
     },
     template: `
         <div class="card">
-            <p>{{ this.card.name }}, index = {{ this.card.index }}</p>
+            <p>{{ this.name }}, index = {{ this.index }}</p>
             <div class="card-task">
-                <task v-for="(task, index) in card.tasks" 
+                <task v-for="(task, index) in tasks" 
                         :task="task" :index="index" :is-locked="isLocked"
                         @sendTaskStatus="sendTaskStatus"></task>
             </div>
-            <p v-if="">Выполнено: </p>
+            <p v-if="whenCompleted != null">Выполнено: {{ this.whenCompleted }}</p>
+            
         </div>
     `,
     methods: {
@@ -195,7 +196,7 @@ Vue.component('column', {
     template: `
         <div class="column"">
             <p class="column-title">{{ this.column.name }} {{ this.index }}</p>
-            <card v-for="card in cards" :key="card.id" :card="card" :is-locked="isLocked"></card>
+            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks" :is-locked="isLocked" :when-completed="card.whenCompleted"></card>
         </div>
     `,
     computed: {
@@ -249,7 +250,7 @@ let app = new Vue({
             let targetIndex = Math.floor(completedPercent / 50);
             currentCard.columnNum = targetIndex;
             if (targetIndex >= this.columns.length-1) {
-                currentCard.whenCompleted = Date.now();
+                currentCard.whenCompleted = new Date().toLocaleString("ru-RU");
             }
             localStorage.setItem("cards", JSON.stringify(this.cards));
             this.cards = [...this.cards];
