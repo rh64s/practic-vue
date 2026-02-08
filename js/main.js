@@ -121,19 +121,23 @@ Vue.component('task', {
 
 Vue.component('card', {
     props: {
-        index: {
-            type: Number,
+        // index: {
+        //     type: Number,
+        //     required: true
+        // },
+        // name: {
+        //     type: String,
+        //     required: true
+        // },
+        // tasks: {
+        //     type: Array,
+        //     required: true,
+        //     min: 3,
+        //     max: 5,
+        // },
+        card: {
+            type: Object,
             required: true
-        },
-        name: {
-            type: String,
-            required: true
-        },
-        tasks: {
-            type: Array,
-            required: true,
-            min: 3,
-            max: 5,
         },
         isLocked: {
             type: Boolean,
@@ -141,12 +145,13 @@ Vue.component('card', {
     },
     template: `
         <div class="card">
-            <p>{{ this.name }}, index = {{ this.index }}</p>
+            <p>{{ this.card.name }}, index = {{ this.card.index }}</p>
             <div class="card-task">
-                <task v-for="(task, index) in tasks" 
+                <task v-for="(task, index) in card.tasks" 
                         :task="task" :index="index" :is-locked="isLocked"
                         @sendTaskStatus="sendTaskStatus"></task>
             </div>
+            <p v-if="">Выполнено: </p>
         </div>
     `,
     methods: {
@@ -169,31 +174,36 @@ Vue.component('card', {
 
 Vue.component('column', {
     props: {
-        name: {
-            type: String,
+        column: {
+            type: Array,
             required: true
-        },
-        max: {
-            type: Number,
-            required: false,
-            default: 0
         },
         cards: {
             type: Array,
             required: true,
             default: []
         },
-        isRedactionLocked: {
+        index: {
+            type: Number,
+            required: true
+        },
+        isLocked: {
             type: Boolean,
-            default: false
+            required: true
         }
     },
     template: `
         <div class="column"">
-            <p class="column-title">{{ this.name }}</p>
-            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks" :is-locked="isRedactionLocked"></card>
+            <p class="column-title">{{ this.column.name }} {{ this.index }}</p>
+            <card v-for="card in cards" :key="card.id" :card="card" :is-locked="isLocked"></card>
         </div>
     `,
+    computed: {
+        isRedactionLocked() {
+            console.log("lo")
+            return false;
+        }
+    }
 });
 
 let app = new Vue({
@@ -204,16 +214,17 @@ let app = new Vue({
             {
                 max: 3,
                 name: "Первый столбец",
-                isRedactionLocked: false
+                isLocked: false,
             },
             {
                 max: 5,
                 name: "Второй столбец",
+                isLocked: false,
             },
             {
                 max: 0,
                 name: "Третий столбец",
-                isRedactionLocked: true
+                isLocked: true,
             },
         ],
         cards: [],
@@ -227,6 +238,7 @@ let app = new Vue({
                 name: name,
                 tasks: tasks,
                 columnNum: 0,
+                whenCompleted: null,
             })
             localStorage.setItem("index", JSON.stringify(nextId));
             localStorage.setItem("cards", JSON.stringify(allCards));
@@ -236,10 +248,23 @@ let app = new Vue({
             let currentCard = this.cards[cardIndex];
             let targetIndex = Math.floor(completedPercent / 50);
             currentCard.columnNum = targetIndex;
+            if (targetIndex >= this.columns.length-1) {
+                currentCard.whenCompleted = Date.now();
+            }
             localStorage.setItem("cards", JSON.stringify(this.cards));
             this.cards = [...this.cards];
+        },
+        isColumnLocked(columnIndex) {
+            if (columnIndex >= this.columns.length-1) {
+                return true;
+            }
+            let nextColumn = this.columns[columnIndex + 1];
+            if (nextColumn.max === 0) {
+                return false;
+            }
+            const cardsInNextColumn = this.cards.filter(card => card.columnNum === columnIndex+1);
+            return cardsInNextColumn.length >= nextColumn.max;
         }
-        
     },
     computed: {
         cardsToColumn() {
@@ -249,17 +274,17 @@ let app = new Vue({
                 })
             })
         },
-        isLocked() {
+        isLocked() { // блокирование добавления
             this.cards = [...this.cards];
             let doLock = !(this.cards.filter(card => card.columnNum === 0).length < this.columns[0].max)
-            this.columns[0].isLocked = doLock;
             return doLock
         },
-        isFirstColumnLocked() {
-            this.cards = [...this.cards];
-            let doLock = !(this.cards.filter(card => card.columnNum === 0).length < this.columns[1].max)
-            this.columns[0].isLocked = doLock;
-        }
+        columnsWithLockState() {
+            return this.columns.map((col, index) => ({
+                ...col,
+                isLocked: this.isColumnLocked(index)
+            }));
+        },
     },
     mounted() {
         this.cards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
