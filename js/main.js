@@ -199,12 +199,6 @@ Vue.component('column', {
             <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks" :is-locked="isLocked" :when-completed="card.whenCompleted"></card>
         </div>
     `,
-    computed: {
-        isRedactionLocked() {
-            console.log("lo")
-            return false;
-        }
-    }
 });
 
 let app = new Vue({
@@ -254,7 +248,6 @@ let app = new Vue({
                 canPlaceInPrev = !(this.cards.filter(card => card.columnNum === targetIndex).length >= this.columns[targetIndex].max);
             }
             if (!canPlaceInPrev) {
-                console.log("как же я блочу переход в", targetIndex);
                 targetIndex = currentCard.columnNum;
             }
             currentCard.columnNum = targetIndex;
