@@ -248,7 +248,17 @@ let app = new Vue({
         checkCard(cardIndex, completedPercent) {
             let currentCard = this.cards[cardIndex];
             let targetIndex = Math.floor(completedPercent / 50);
+            
+            let canPlaceInPrev = true;
+            if (targetIndex < currentCard.columnNum) {
+                canPlaceInPrev = !(this.cards.filter(card => card.columnNum === targetIndex).length >= this.columns[targetIndex].max);
+            }
+            if (!canPlaceInPrev) {
+                console.log("как же я блочу переход в", targetIndex);
+                targetIndex = currentCard.columnNum;
+            }
             currentCard.columnNum = targetIndex;
+            
             if (targetIndex >= this.columns.length-1) {
                 currentCard.whenCompleted = new Date().toLocaleString("ru-RU");
             }
@@ -270,7 +280,7 @@ let app = new Vue({
     computed: {
         cardsToColumn() {
             return this.columns.map((column, index) => {
-                return this.cards.filter(function (card) {
+                return this.cards.filter(function (card ) {
                     return card.columnNum === index;
                 })
             })
