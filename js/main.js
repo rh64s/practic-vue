@@ -223,6 +223,9 @@ let app = new Vue({
             },
         ],
         cards: [],
+        queue: [
+            [],[]
+        ]
     },
     methods: {
         addCart(name, tasks) {
@@ -242,14 +245,36 @@ let app = new Vue({
         checkCard(cardIndex, completedPercent) {
             let currentCard = this.cards[cardIndex];
             let targetIndex = Math.floor(completedPercent / 50);
+                
+            if (targetIndex !== currentCard.columnNum) {
+                if (this.cards.filter(c => c.columnNum === targetIndex).length < this.columns[targetIndex].max
+                    || this.columns[targetIndex].max === 0) {
+                    if (this.columns[targetIndex].max !== 0) this.columns[targetIndex].isLocked = false;
+                    this.columns[currentCard.columnNum].isLocked = false;
+                    if (this.queue[currentCard.columnNum][0]) {
+                        this.queue[currentCard.columnNum][0].func(this.queue[currentCard.columnNum][0].target);
+                    }
+                 }
+                else {
+                    const queueFunc = (target) => {
+                        this.columns[currentCard.columnNum].isLocked = false;
+                        currentCard.columnNum = target;
+                    }
+                    this.columns[currentCard.columnNum].isLocked = true;
+                    if (this.queue[currentCard.columnNum][0]) {
+                        this.queue[currentCard.columnNum][0].func(this.queue[currentCard.columnNum][0].target);
+                        queueFunc(targetIndex);
+                    }
+                    else {
+                        this.queue[targetIndex].push({
+                            func: queueFunc,
+                            target: targetIndex
+                        });
+                        targetIndex = currentCard.columnNum;
+                    }
+                }
+            }
             
-            let canPlaceInPrev = true;
-            if (targetIndex < currentCard.columnNum) {
-                canPlaceInPrev = !(this.cards.filter(card => card.columnNum === targetIndex).length >= this.columns[targetIndex].max);
-            }
-            if (!canPlaceInPrev) {
-                targetIndex = currentCard.columnNum;
-            }
             currentCard.columnNum = targetIndex;
             
             if (targetIndex >= this.columns.length-1) {
@@ -266,8 +291,6 @@ let app = new Vue({
             if (nextColumn.max === 0) {
                 return false;
             }
-            const cardsInNextColumn = this.cards.filter(card => card.columnNum === columnIndex+1);
-            return cardsInNextColumn.length >= nextColumn.max;
         }
     },
     computed: {

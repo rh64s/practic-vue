@@ -16,7 +16,7 @@
 
         <div class="flex-centered">
             <div class="todo-body">
-                <column v-for="(column, index) in columns" :column="column" :cards="cardsToColumn[index]" :index="index" :is-locked="columnsWithLockState[index].isLocked"></column>
+                <column v-for="(column, index) in columns" :column="column" :cards="cardsToColumn[index]" :index="index" :is-locked="column.isLocked"></column>
             </div>
         </div>
     </div>
