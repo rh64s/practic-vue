@@ -35,7 +35,7 @@ Vue.component('createTask', {
             <div class="form-error" v-for="textError in errors">
                 <p>{{textError}}</p>
             </div>
-            <button type="submit" class="button-create">Создать</button>
+            <button type="submit" class="button-create">Создать карточку</button>
         </form>
         <div v-else class="form-create-task">
             <p>Вы не можете добавить больше 3 карточек</p>
