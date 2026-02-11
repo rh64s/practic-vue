@@ -145,7 +145,7 @@ Vue.component('card', {
     },
     template: `
         <div class="card">
-            <p>{{ this.name }}</p>
+            <p>{{this.index}} {{ this.name }}</p>
             <div class="card-task">
                 <task v-for="(task, index) in tasks" 
                         :task="task" :index="index" :is-locked="isLocked"
@@ -199,22 +199,20 @@ let app = new Vue({
                 max: 3,
                 name: "Первый столбец",
                 isLocked: false,
-                cardReadyToGo: -1,
             },
             {
                 max: 5,
                 name: "Второй столбец",
                 isLocked: false,
-                cardReadyToGo: -1,
             },
             {
                 max: 0,
                 name: "Третий столбец",
                 isLocked: true,
-                cardReadyToGo: -1,
             },
         ],
         cards: [],
+        queue: -1
     },
     methods: {
         addCart(name, tasks) {
@@ -231,49 +229,60 @@ let app = new Vue({
             localStorage.setItem("cards", JSON.stringify(allCards));
             this.cards = allCards;
         },
-        completedPercentOfCard(cardIndex) {
+        getTargetColumnIndex(cardIndex) {
             let completedPercent = 0;
             for (task of this.cards[cardIndex].tasks) {
                 if (task.isChecked) {
                     completedPercent++;
                 }
             }
-            return (completedPercent / this.cards[cardIndex].tasks.length) * 100;
-        },
-        getTargetColumnIndex(cardIndex) {
-            return Math.floor(this.completedPercentOfCard(cardIndex) / 50);
+            return Math.floor(((completedPercent / this.cards[cardIndex].tasks.length) * 100) / 50);
         },
         checkCard(cardIndex) {
-            let currentCard = this.cards[cardIndex];
-            let targetIndex = this.getTargetColumnIndex(cardIndex);
-            // let canPlaceInPrev = true;
-            // if (targetIndex < currentCard.columnNum) {
-            //     canPlaceInPrev = !(this.cards.filter(card => card.columnNum === targetIndex).length >= this.columns[targetIndex].max);
-            // }
-            // if (!canPlaceInPrev) {
-            //     targetIndex = currentCard.columnNum;
-            // }
-            //
-            if (this.isColumnFull(targetIndex) || (this.columns[targetIndex].isLocked && this.columns[targetIndex].max > 0)) {
-                this.columns[currentCard.columnNum].cardReadyToGo = currentCard.id;
-            } else {
-                currentCard.columnNum = targetIndex;
-                this.columns[currentCard.columnNum].cardReadyToGo = -1;
-                this.columns[currentCard.columnNum].isLocked = false;
-                if (targetIndex >= this.columns.length-1) {
-                    currentCard.whenCompleted = new Date().toLocaleString("ru-RU");
+            let card = this.cards[cardIndex];
+            let targetColumnIndex = this.getTargetColumnIndex(cardIndex);
+            if (!(targetColumnIndex === card.columnNum)) {
+                if (this.cards.filter(card => card.columnNum === targetColumnIndex).length >= this.columns[targetColumnIndex].max && this.columns[targetColumnIndex].max !== 0) {
+                    this.queue = card.id;
+                } else {
+                    card.columnNum = targetColumnIndex;
+                    if (this.queue === card.id) {
+                        this.queue = -1;
+                    }
                 }
             }
+            this.blockColumns();
             localStorage.setItem("cards", JSON.stringify(this.cards));
             this.cards = [...this.cards];
-            console.log("сейчас такая карта ", this.columns[currentCard.columnNum].cardReadyToGo);
-            this.columnsWithLockState;
         },
         isColumnFull(columnIndex) {
             if (this.columns[columnIndex].max === 0) return false;
             return this.cards.filter(card => card.columnNum === columnIndex).length >= this.columns[columnIndex].max
         },
-        
+        blockColumns() {
+            this.columns.forEach((column, index) => {
+                if (index === this.columns.length - 1) {
+                    column.isLocked = true;
+                    return;
+                }
+                if (this.columns[index+1].max === 0) {
+                    column.isLocked = false;
+                    return;
+                }
+            });
+            if (this.queue >= 0 && !this.isColumnFull(this.getTargetColumnIndex(this.cards[this.queue].id))) {
+                this.checkCard(this.cards[this.queue].id);
+                this.columns = [...this.columns];
+                this.queue = -1;
+                this.columns[0].isLocked = false;
+                return
+            }
+            if (this.queue >= 0) {
+                let card = this.cards[this.queue];
+                this.columns[card.columnNum].isLocked = true;
+            } 
+            this.columns = [...this.columns];
+        },
     },
     computed: {
         cardsToColumn() {
@@ -285,42 +294,17 @@ let app = new Vue({
         },
         isAddLocked() { // блокирование добавления
             this.cards = [...this.cards];
+            console.log(this.cards.filter(card => card.columnNum === 0).length >= this.columns[0].max);
+            console.log(this.columns[0].isLocked)
             return this.cards.filter(card => card.columnNum === 0).length >= this.columns[0].max 
                 || this.columns[0].isLocked
-        },
-        columnsWithLockState() {
-            this.columns.forEach((column, index) => {
-                if (index >= this.columns.length-1) {
-                    column.isLocked = true;
-                    return;
-                }
-                if (this.columns[index+1].max === 0) {
-                    column.isLocked = false;
-                    return;
-                }
-                
-                if (this.columns[index].cardReadyToGo < 0) {
-                    column.isLocked = false;
-                }
-                
-                if (this.columns[index].cardReadyToGo >= 0 && this.isColumnFull(this.getTargetColumnIndex(this.columns[index].cardReadyToGo))) {
-                    column.isLocked = true;
-                } else if (this.columns[index].cardReadyToGo >= 0 && !(this.isColumnFull(this.getTargetColumnIndex(this.columns[index].cardReadyToGo)))) {
-                    this.columns[index].cardReadyToGo = -1;
-                    this.checkCard(this.columns[index].cardReadyToGo);
-                }
-                
-                const cardsInNextColumn = this.cards.filter(card => card.columnNum === index+1);
-                // column.isLocked = (cardsInNextColumn.length >= this.columns[index+1].max);
-            })
         },
     },
     mounted() {
         this.cards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
         let checkCard = this.checkCard.bind(this);
-        this.cards.forEach(card => {
-            checkCard(card.id);
-        })
+        let blockColumns = this.blockColumns.bind(this);
+        blockColumns();
         eventBus.$on('changeTaskStatus', function (cardIndex) {
             checkCard(cardIndex);
         });
