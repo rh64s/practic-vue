@@ -260,3 +260,6 @@ input[type="text"]:focus {
     background-color: #e6f0fa;
     border-color: #a0aec0;
 }
+.invincible {
+    display: none;
+}

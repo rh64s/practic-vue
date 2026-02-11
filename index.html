@@ -12,6 +12,7 @@
 <body>
     <div id="app">
         <h1>Todo list</h1>
+        <find-card-name @find-card="findCards"></find-card-name>
         <create-task :is-locked="isAddLocked" @add-cart="addCart"></create-task>
 
         <div class="flex-centered">

@@ -1,5 +1,26 @@
 let eventBus = new Vue()
 
+Vue.component('findCardName', {
+    data() {
+        return {
+            fieldText: "",
+        }
+    },
+    template: `
+    <div class="find">
+        <h2 class="find-title">Поиск карты по названию</h2>
+        <input class="find-input" type="text" placeholder="Name" v-model="fieldText">
+        <button v-on:click="callFind">Найти</button>
+    </div>
+    `,
+    methods: {
+        callFind() {
+            this.$emit('find-card', this.fieldText);
+        }
+    }
+    
+})
+
 Vue.component('createTask', {
     data() {
         return {
@@ -141,11 +162,15 @@ Vue.component('card', {
         whenCompleted: {
             type: String,
             required: false
+        },
+        isInvincible: {
+            type: Boolean,
+            default: true
         }
     },
     template: `
-        <div class="card">
-            <p>{{this.index}} {{ this.name }}</p>
+        <div class="card" :class="{invincible: isInvincible}">
+            <p>{{ this.name }}</p>
             <div class="card-task">
                 <task v-for="(task, index) in tasks" 
                         :task="task" :index="index" :is-locked="isLocked"
@@ -183,9 +208,9 @@ Vue.component('column', {
         }
     },
     template: `
-        <div class="column"">
+        <div class="column">
             <p class="column-title">{{ this.column.name }}</p>
-            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks" :is-locked="isLocked" :when-completed="card.whenCompleted"></card>
+            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks" :is-locked="isLocked" :when-completed="card.whenCompleted" :is-invincible="card.isInvincible"></card>
         </div>
     `,
 });
@@ -212,7 +237,8 @@ let app = new Vue({
             },
         ],
         cards: [],
-        queue: -1
+        queue: -1,
+        hasPriorityCard: false,
     },
     methods: {
         addCart(name, tasks) {
@@ -224,6 +250,8 @@ let app = new Vue({
                 tasks: tasks,
                 columnNum: 0,
                 whenCompleted: null,
+                isInvincible: false,
+                isPriorityCard: false,
             })
             localStorage.setItem("index", JSON.stringify(nextId));
             localStorage.setItem("cards", JSON.stringify(allCards));
@@ -283,6 +311,15 @@ let app = new Vue({
             } 
             this.columns = [...this.columns];
         },
+        findCards(text) {
+            this.cards.forEach((card, index) => {
+                if (text === "") {
+                    card.isInvincible = false;
+                    return;
+                }
+                card.isInvincible = !(card.name.includes(text));
+            });
+        }
     },
     computed: {
         cardsToColumn() {
