@@ -8,7 +8,7 @@ Vue.component('card', {
             redactedName: this.card.name,
             redactedDescription: this.card.description,
             redactedDeadline: this.card.deadline,
-            redactedMessage: this.card.message,
+            redactedMessage: "",
         }
     },
     props: {
@@ -28,6 +28,9 @@ Vue.component('card', {
             <p class="card-created_at">Создана: {{new Date(card.created_at).toLocaleString('ru-RU')}}</p>
             <p class="card-created_at" v-if="card.updated_at != null">Изменена: {{new Date(card.updated_at).toLocaleString('ru-RU')}}</p>
             <p class="card-deadline">Дедлайн: {{new Date(card.deadline).toLocaleString('ru-RU')}}</p>
+            <div v-if="card.message !== null && card.message.length > 0">
+                <p class="card-message warning">{{card.message}}</p>
+            </div>
         </div>
         <div class="card-controller">
             <div v-if="card.column_id < 4">
@@ -67,7 +70,7 @@ Vue.component('card', {
                 <label>Введите причину перевода</label>
                 <input type="text" v-model="redactedMessage" placeholder="Название">
             </div>
-            <button type="submit" class="btn btn-primary" v-on:click="saveCard">Сохранить и перевести</button>
+            <button type="submit" class="btn btn-primary" v-on:click="moveCard(-1)">Сохранить и перевести</button>
             <button type="button" class="btn btn-secondary" v-on:click="close">Отменить и закрыть</button>
         </form>
         <div class="errors" v-if="errors.length > 0">
@@ -79,11 +82,12 @@ Vue.component('card', {
     methods: {
         moveCard(direction) { 
             if(direction === -1) {
-                if (this.redactedMessage === null) {
+                if (this.redactedMessage.length === 0) {
                     this.currentModalMode = 2;
                     return
                 } else if (this.redactedMessage.length > 0) {
                     eventBus.$emit('attach-message', this.card.id, this.redactedMessage)
+                    this.redactedMessage = "";
                 }
             }
             eventBus.$emit('move-card', this.card.id, direction);
