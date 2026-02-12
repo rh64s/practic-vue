@@ -13,11 +13,11 @@
     <div id="app">
         <h1>Todo list</h1>
         <find-card-name @find-card="findCards"></find-card-name>
-        <create-task :is-locked="isAddLocked" @add-cart="addCart"></create-task>
-
+        <create-task :is-locked="isAddLocked" @add-cart="addCart" :has-priority-card="hasPriorityCard"></create-task>
+        <h2 v-if="hasPriorityCard === true">Имеется приоритетная карта!</h2>
         <div class="flex-centered">
             <div class="todo-body">
-                <column v-for="(column, index) in columns" :column="column" :cards="cardsToColumn[index]" :index="index" :is-locked="column.isLocked"></column>
+                <column v-for="(column, index) in columns" :column="column" :cards="cardsToColumn[index]" :index="index" :is-locked="column.isLocked" :has-priority-card="hasPriorityCard"></column>
             </div>
         </div>
     </div>

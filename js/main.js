@@ -31,6 +31,7 @@ Vue.component('createTask', {
         return {
             name: "",
             tasks: [],
+            isPriority: false,
             isDisabled: true,
             errors: [
             ]
@@ -39,6 +40,10 @@ Vue.component('createTask', {
     props: {
         isLocked: {
             type: Boolean,
+        },
+        hasPriorityCard: {
+            type: Boolean,
+            default: false
         }
     },
     template: `
@@ -50,6 +55,10 @@ Vue.component('createTask', {
             <div class="form-group">
                 <label for="form-cart-name">Название</label>
                 <input id="form-cart-name" type="text" v-model="name" placeholder="Введите название">
+            </div>
+            <div class="form-group">
+                <label for="form-priority">Сделать приоритетной (весь функционал блокируется до тех пор, пока карточка не будет выполнена)</label>
+                <input id="form-priority" type="checkbox" v-model="isPriority">
             </div>
             <button type="button" class="button-second" v-on:click="addTask">Добавить задание</button>
             <div class="form-group">
@@ -63,6 +72,7 @@ Vue.component('createTask', {
             </div>
             <button type="submit" class="button-create">Создать карточку</button>
         </form>
+        <div v-else-if="hasPriorityCard" class="form-create-task">Вы не можете ничего добавлять, пока существует приоритетная карта</div>
         <div v-else class="form-create-task">
             <p>Вы не можете добавить больше 3 карточек</p>
         </div>
@@ -79,10 +89,11 @@ Vue.component('createTask', {
                 }
             }
             if(this.name && (this.tasks.length >= 3 && this.tasks.length <= 5) && !hasEmptyTask) {
-                this.$emit('add-cart', this.name, this.tasks);
+                this.$emit('add-cart', this.name, this.tasks, this.isPriority);
                 this.name = ""
                 this.tasks = []
                 this.isDisabled = true;
+                this.isPriority = false;
                 return
             }
             if(hasEmptyTask) {
@@ -171,14 +182,22 @@ Vue.component('card', {
         isInvincible: {
             type: Boolean,
             default: true
+        },
+        isPriority: {
+            type: Boolean,
+            default: false
+        },
+        hasPriorityCard: {
+            type: Boolean,
+            default: false
         }
     },
     template: `
         <div class="card" :class="{invincible: isInvincible}">
-            <p>{{ this.name }}</p>
+            <p><span v-if="isPriority">&#127775;</span>{{ this.name }}</p>
             <div class="card-task">
                 <task v-for="(task, index) in tasks" 
-                        :task="task" :index="index" :is-locked="isLocked"
+                        :task="task" :index="index" :is-locked="isLocked || checkIsLockedByPriority"
                         @sendTaskStatus="sendTaskStatus"></task>
             </div>
             <p v-if="whenCompleted != null">Выполнено: {{ this.whenCompleted }}</p>
@@ -190,6 +209,11 @@ Vue.component('card', {
             eventBus.$emit('changeTaskStatus', this.index);
         }
     },
+    computed: {
+        checkIsLockedByPriority() {
+            return !this.isPriority && this.hasPriorityCard
+        }
+    }
 })
 
 Vue.component('column', {
@@ -210,12 +234,19 @@ Vue.component('column', {
         isLocked: {
             type: Boolean,
             required: true
+        },
+        hasPriorityCard: {
+            type: Boolean,
+            default: false
         }
     },
     template: `
         <div class="column">
             <p class="column-title">{{ this.column.name }}</p>
-            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks" :is-locked="isLocked" :when-completed="card.whenCompleted" :is-invincible="card.isInvincible"></card>
+            <card v-for="card in cards" :key="card.id" :index="card.id" :name="card.name" :tasks="card.tasks" 
+            :is-locked="isLocked" :when-completed="card.whenCompleted" 
+            :is-invincible="card.isInvincible" :is-priority="card.isPriority" 
+            :has-priority-card="hasPriorityCard"></card>
         </div>
     `,
 });
@@ -243,10 +274,9 @@ let app = new Vue({
         ],
         cards: [],
         queue: -1,
-        hasPriorityCard: false,
     },
     methods: {
-        addCart(name, tasks) {
+        addCart(name, tasks, isPriority) {
             let allCards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
             let nextId = JSON.parse(localStorage.getItem("index") || 0);
             allCards.push({
@@ -256,7 +286,7 @@ let app = new Vue({
                 columnNum: 0,
                 whenCompleted: null,
                 isInvincible: false,
-                isPriorityCard: false,
+                isPriority: isPriority,
             })
             localStorage.setItem("index", JSON.stringify(nextId));
             localStorage.setItem("cards", JSON.stringify(allCards));
@@ -275,7 +305,12 @@ let app = new Vue({
             let card = this.cards[cardIndex];
             let targetColumnIndex = this.getTargetColumnIndex(cardIndex);
             if (!(targetColumnIndex === card.columnNum)) {
-                if (this.cards.filter(card => card.columnNum === targetColumnIndex).length >= this.columns[targetColumnIndex].max && this.columns[targetColumnIndex].max !== 0) {
+                if (card.isPriority) {
+                    if (targetColumnIndex === this.columns.length - 1) {
+                        card.isPriority = false;
+                    }
+                    card.columnNum = targetColumnIndex;
+                } else if (this.cards.filter(card => card.columnNum === targetColumnIndex).length >= this.columns[targetColumnIndex].max && this.columns[targetColumnIndex].max !== 0) {
                     this.queue = card.id;
                 } else {
                     card.columnNum = targetColumnIndex;
@@ -302,7 +337,13 @@ let app = new Vue({
                     column.isLocked = false;
                     return;
                 }
+                if (this.hasPriorityCard) {
+                    column.isLocked = false;
+                }
             });
+            if (this.hasPriorityCard) {
+                return
+            }
             if (this.queue >= 0 && !this.isColumnFull(this.getTargetColumnIndex(this.cards[this.queue].id))) {
                 this.checkCard(this.cards[this.queue].id);
                 this.columns = [...this.columns];
@@ -317,12 +358,13 @@ let app = new Vue({
             this.columns = [...this.columns];
         },
         findCards(text) {
+            console.log(text);
             this.cards.forEach((card, index) => {
-                if (text === "") {
-                    card.isInvincible = false;
-                    return;
-                }
                 card.isInvincible = !(card.name.includes(text));
+                if (text.length === 0) {
+                    console.log("shown", index)
+                    card.isInvincible = false;
+                }
             });
         }
     },
@@ -336,11 +378,15 @@ let app = new Vue({
         },
         isAddLocked() { // блокирование добавления
             this.cards = [...this.cards];
-            console.log(this.cards.filter(card => card.columnNum === 0).length >= this.columns[0].max);
-            console.log(this.columns[0].isLocked)
+            if (this.hasPriorityCard) {
+                return true;
+            }
             return this.cards.filter(card => card.columnNum === 0).length >= this.columns[0].max 
-                || this.columns[0].isLocked
+                || this.columns[0].isLocked;
         },
+        hasPriorityCard() {
+            return this.cards.filter(card => card.isPriority === true).length > 0;
+        }
     },
     mounted() {
         this.cards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
