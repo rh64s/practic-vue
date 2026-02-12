@@ -49,7 +49,7 @@ Vue.component('create-form', {
     <div v-if="isActive">
         <form @submit.prevent="createCard">
             <div class="form-group">
-                <label>Название задачи {{card.name}}</label>
+                <label>Название задачи</label>
                 <input type="text" v-model="card.name" placeholder="Название">
             </div>
             <div class="form-group">
