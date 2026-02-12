@@ -11,11 +11,16 @@ Vue.component('findCardName', {
         <h2 class="find-title">Поиск карты по названию</h2>
         <input class="find-input" type="text" placeholder="Name" v-model="fieldText">
         <button v-on:click="callFind">Найти</button>
+        <button v-on:click="reset">Сбросить</button>
     </div>
     `,
     methods: {
         callFind() {
             this.$emit('find-card', this.fieldText);
+        },
+        reset() {
+            this.fieldText = "";
+            this.callFind();
         }
     }
     
