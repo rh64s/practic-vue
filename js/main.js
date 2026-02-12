@@ -78,6 +78,14 @@ Vue.component('card', {
 </div>`,
     methods: {
         moveCard(direction) { 
+            if(direction === -1) {
+                if (this.redactedMessage === null) {
+                    this.currentModalMode = 2;
+                    return
+                } else if (this.redactedMessage.length > 0) {
+                    eventBus.$emit('attach-message', this.card.id, this.redactedMessage)
+                }
+            }
             eventBus.$emit('move-card', this.card.id, direction);
         },
         deleteCard() {eventBus.$emit('delete-card', this.card.id); },
@@ -108,7 +116,7 @@ Vue.component('card', {
             this.redactedName = this.card.name;
             this.redactedDescription = this.card.description;
             this.redactedDeadline = this.card.deadline;
-            this.redactedMessage = this.card.message;
+            this.redactedMessage = "";
             this.currentModalMode = 0;
         }
     }
@@ -253,6 +261,10 @@ let app = new Vue({
         deleteCard(cardId) {
             this.cards = this.cards.filter(card => card.id !== cardId);
             this.saveCards()
+        },
+        attachMessage(cardId, message) {
+            this.getCard(cardId).message = message
+            this.saveCards();
         }
     },
     computed: {
@@ -269,5 +281,6 @@ let app = new Vue({
         eventBus.$on('move-card', this.moveCard);
         eventBus.$on('delete-card', this.deleteCard);
         eventBus.$on('save-card', this.saveCard);
+        eventBus.$on('attach-message', this.attachMessage)
     }
 })
