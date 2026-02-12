@@ -1,223 +1,819 @@
-/* Основные стили для страницы */
-body {
-    font-family: 'Noto Sans', Arial, sans-serif;
+/* style.css - Красочная и анимированная канбан-доска */
+/* ИСПРАВЛЕННАЯ ВЕРСИЯ */
+
+/* Импорт современных шрифтов */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+
+/* Сброс стилей и глобальные переменные */
+:root {
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-success: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    --gradient-warning: linear-gradient(135deg, #fad0c4 0%, #ff9a9e 100%);
+    --gradient-danger: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    --gradient-column: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(245,247,250,0.95) 100%);
+    --shadow-sm: 0 5px 15px rgba(0,0,0,0.08);
+    --shadow-md: 0 8px 25px rgba(0,0,0,0.1);
+    --shadow-lg: 0 15px 35px rgba(0,0,0,0.1);
+    --shadow-hover: 0 20px 40px rgba(102,126,234,0.15);
+    --border-radius-sm: 12px;
+    --border-radius-md: 18px;
+    --border-radius-lg: 25px;
+    --transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+* {
     margin: 0;
-    padding: 20px;
-    background-color: #f5f5f5;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 30px;
+    position: relative;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Анимированные фоновые элементы */
+body::before {
+    content: '✨';
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 40px;
+    animation: float 6s ease-in-out infinite;
+    opacity: 0.2;
+    z-index: 0;
+    pointer-events: none;
+}
+
+body::after {
+    content: '🎯';
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 50px;
+    animation: float 8s ease-in-out infinite reverse;
+    opacity: 0.2;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(10deg); }
 }
 
 #app {
-    max-width: 1200px;
+    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    padding: 0 20px;
 }
 
 h1 {
-    text-align: center;
-    color: #2071D2;
-    margin-bottom: 30px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.1), 8px 8px 20px rgba(0,0,0,0.2);
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+    animation: slideDown 1s ease-out, glow 3s ease-in-out infinite;
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
-/* Стили для Kanban доски */
+h1::before {
+    content: '📋';
+    position: absolute;
+    left: -60px;
+    top: -10px;
+    font-size: 50px;
+    animation: bounce 2s ease infinite;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glow {
+    0%, 100% { text-shadow: 3px 3px 0 rgba(0,0,0,0.1), 8px 8px 20px rgba(0,0,0,0.2); }
+    50% { text-shadow: 3px 3px 0 rgba(0,0,0,0.1), 15px 15px 30px rgba(102,126,234,0.5); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+/* Канбан доска - ИСПРАВЛЕНО для широких экранов */
 .canban {
     display: flex;
-    gap: 20px;
+    gap: 30px;
+    padding: 10px;
+    animation: fadeInScale 1s ease-out;
+    width: 100%;
+    flex-wrap: nowrap;
     overflow-x: auto;
-    padding: 10px 0;
+    overflow-y: visible;
+    min-width: 0;
+    height: fit-content;
 }
 
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Колонки - ИСПРАВЛЕНО для отображения контента */
 .column {
-    min-width: 300px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 15px;
+    flex: 1 1 300px;
+    min-width: 400px;
+    max-width: 550px;
+    background: var(--gradient-column);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg);
+    padding: 25px 20px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    border: 1px solid rgba(255,255,255,0.3);
+    position: relative;
+    overflow: hidden;
+    animation: columnAppear 0.5s ease-out;
+    animation-fill-mode: both;
     display: flex;
     flex-direction: column;
+    height: fit-content;
+    max-height: 1500px;
+}
+
+.column:nth-child(1) { animation-delay: 0.1s; }
+.column:nth-child(2) { animation-delay: 0.2s; }
+.column:nth-child(3) { animation-delay: 0.3s; }
+.column:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes columnAppear {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.column::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--gradient-primary);
+    border-radius: 5px 5px 0 0;
+}
+
+.column:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(102,126,234,0.3);
 }
 
 .column-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin: 0 0 15px 0;
-    padding: 10px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    text-align: center;
-    color: #495057;
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(102,126,234,0.2);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+.column-title::before {
+    content: '📌';
+    font-size: 20px;
+    animation: pulse 2s ease infinite;
+    flex-shrink: 0;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Карточки - ИСПРАВЛЕНО для отображения контента */
 .cards {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    flex-grow: 1;
+    gap: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 5px;
+    scrollbar-width: thin;
+    scrollbar-color: #764ba2 #f0f0f0;
+    flex: 1 1 auto;
+    min-height: 300px;
 }
 
-/* Стили для карточки */
+.cards::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cards::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.5);
+    border-radius: 10px;
+}
+
+.cards::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 10px;
+}
+
 .card {
-    background-color: #ffffff;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 15px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: var(--gradient-card);
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid rgba(255,255,255,0.8);
+    position: relative;
+    overflow: hidden;
+    animation: cardAppear 0.5s ease-out;
+    width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: var(--shadow-hover);
+    border-color: transparent;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+}
+
+.card.success {
+    border-left: 6px solid #48bb78;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+}
+
+.card.success::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    color: #48bb78;
+    animation: checkmark 0.5s ease-out;
+}
+
+@keyframes checkmark {
+    from {
+        opacity: 0;
+        transform: scale(0) rotate(-180deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
 }
 
 .card-header {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #e2e8f0;
+    width: 100%;
 }
 
 .card-name {
-    font-size: 16px;
-    font-weight: bold;
-    margin: 0 0 5px 0;
-    color: #212529;
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    position: relative;
+    display: inline-block;
+    max-width: calc(100% - 30px);
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.card-name::after {
+    content: '📝';
+    position: absolute;
+    right: -25px;
+    top: 0;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover .card-name::after {
+    opacity: 1;
 }
 
 .card-info {
-    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
 }
 
 .card-description {
+    color: #4a5568;
+    line-height: 1.6;
     font-size: 14px;
-    color: #6c757d;
-    margin: 0 0 8px 0;
-    line-height: 1.4;
+    padding: 10px;
+    background: rgba(247,250,252,0.7);
+    border-radius: 8px;
+    border-left: 3px solid #667eea;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
-.card-created_at,
-.card-deadline {
+.card-created_at, .card-deadline {
     font-size: 12px;
-    color: #868e96;
-    margin: 4px 0;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.card-created_at::before {
+    content: '🕐';
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.card-deadline::before {
+    content: '⏰';
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.card-message {
+    background: var(--gradient-warning);
+    padding: 12px;
+    border-radius: 8px;
+    color: #744210;
+    font-size: 13px;
+    margin-top: 10px;
+    animation: shake 0.5s ease-out;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.card-message.warning {
+    background: linear-gradient(135deg, #fed7d7 0%, #feebc8 100%);
+    border-left: 4px solid #f56565;
+}
+
+.card-message::before {
+    content: '⚠️';
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+/* Кнопки - ИСПРАВЛЕНО */
+.btn, .card-button-delete, .card-button-change, .card-button-move {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.btn::before, .card-button-delete::before, .card-button-change::before, .card-button-move::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before, .card-button-delete:hover::before, .card-button-change:hover::before, .card-button-move:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(102,126,234,0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+    color: white;
+}
+
+.card-button-delete {
+    background: var(--gradient-danger);
+    color: white;
+    padding: 8px 16px;
+}
+
+.card-button-change {
+    background: linear-gradient(135deg, #fcb045 0%, #fd1d1d 100%);
+    color: white;
+    padding: 8px 16px;
+}
+
+.card-button-move {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.card-button-move:hover {
+    transform: scale(1.1) rotate(360deg);
 }
 
 .card-controller {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-.card-button-move,
-.card-button-delete {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
+.card-controller > div {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.card-button-move {
-    background-color: #2071D2;
-    color: white;
-}
-
-.card-button-move:hover {
-    background-color: #43B1E8;
-}
-
-.card-button-delete {
-    background-color: #dc3545;
-    color: white;
-}
-
-.card-button-delete:hover {
-    background-color: #c82333;
-}
-
-/* Стили для формы создания карточки */
+/* Формы - ИСПРАВЛЕНО */
 .create-form {
-    margin-bottom: 10px;
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    animation: formAppear 0.4s ease-out;
+    width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+@keyframes formAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    width: 100%;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4a5568;
     font-size: 14px;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
-.form-group input[type="text"],
-.form-group textarea,
-.form-group input[type="date"] {
+.form-group label::before {
+    content: '✨';
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+input[type="text"],
+textarea,
+input[type="date"] {
     width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
+    padding: 12px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
     font-size: 14px;
+    transition: var(--transition);
+    background: white;
+    max-width: 100%;
     box-sizing: border-box;
 }
 
-.form-group textarea {
+input[type="text"]:focus,
+textarea:focus,
+input[type="date"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+    transform: translateY(-2px);
+}
+
+textarea {
+    min-height: 100px;
     resize: vertical;
-    min-height: 80px;
 }
 
-.btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
-    margin-right: 8px;
-}
-
-.btn-primary {
-    background-color: #2071D2;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #43B1E8;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
-}
-
+/* Ошибки - ИСПРАВЛЕНО */
 .errors {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
+    margin-top: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+    border-radius: 12px;
+    border-left: 6px solid #f56565;
+    animation: slideInError 0.3s ease-out;
+    width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+@keyframes slideInError {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .error {
-    color: #721c24;
+    color: #c53030;
     font-size: 14px;
-    margin: 0;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
+.error::before {
+    content: '❌';
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+/* Анимации для Vue переходов */
+.v-enter-active,
+.v-leave-active {
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+}
+
+/* Дополнительные анимированные элементы */
+.canban::before {
+    content: '⬅️ ➡️';
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    animation: slide 2s ease-in-out infinite;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes slide {
+    0%, 100% { transform: translateX(-50%); }
+    50% { transform: translateX(-30px); }
+}
+
+/* Адаптивность - ИСПРАВЛЕНО для всех экранов */
+@media (max-width: 1400px) {
+    .column {
+        min-width: 280px;
+    }
+}
+
+@media (max-width: 1200px) {
     .canban {
-        flex-direction: column;
+        flex-wrap: wrap;
     }
 
     .column {
+        flex: 0 1 calc(50% - 15px);
+        min-width: 300px;
+        max-width: 100%;
+    }
+
+    h1 {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .column {
+        flex: 0 1 100%;
         min-width: 100%;
     }
 
     body {
-        padding: 10px;
+        padding: 15px;
+    }
+
+    #app {
+        padding: 0 10px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+
+    h1::before {
+        left: -50px;
+        font-size: 40px;
+    }
+
+    .card-controller {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .card-controller > div {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (min-width: 1900px) {
+    .canban {
+        gap: 40px;
+        justify-content: center;
+    }
+
+    .column {
+        min-width: 350px;
+        max-width: 450px;
+        flex: 0 1 350px;
+    }
+
+    .cards {
+        max-height: 700px;
+    }
+}
+
+/* Уникальные эффекты для каждой колонны */
+.column:nth-child(1) .card {
+    animation: cardGlow 3s ease-in-out infinite;
+}
+
+.column:nth-child(2) .card {
+    animation: cardGlow 3s ease-in-out infinite 0.5s;
+}
+
+.column:nth-child(3) .card {
+    animation: cardGlow 3s ease-in-out infinite 1s;
+}
+
+.column:nth-child(4) .card {
+    animation: cardGlow 3s ease-in-out infinite 1.5s;
+}
+
+@keyframes cardGlow {
+    0%, 100% { box-shadow: var(--shadow-sm); }
+    50% { box-shadow: 0 5px 25px rgba(102,126,234,0.2); }
+}
+
+/* Конфетти эффект при создании карточки */
+@keyframes confetti {
+    0% { transform: translateY(0) rotate(0); opacity: 1; }
+    100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+}
+
+.create-form button[type="submit"]:active {
+    animation: clickPop 0.3s ease-out;
+}
+
+@keyframes clickPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* Красивые градиенты для фона карточек */
+.card:nth-child(even) {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f0ff 100%);
+}
+
+.card:nth-child(odd) {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+}
+
+/* Исправление для длинного текста */
+.card-name,
+.card-description,
+.card-message,
+.column-title,
+p {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Фикс для кнопок на мобильных */
+@media (max-width: 480px) {
+    .btn,
+    .card-button-delete,
+    .card-button-change {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .card-button-move {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
     }
 }

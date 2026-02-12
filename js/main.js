@@ -18,7 +18,7 @@ Vue.component('card', {
         },
     },
     template: `
-<div class="card" :class="{success: !card.is_expired}">
+<div class="card" :class="{expired: card.is_expired; success: !card.is_expired}">
     <div v-if="currentModalMode === 0">
         <div class="card-header">
             <p class="card-name">{{ card.name }}</p>
@@ -51,11 +51,11 @@ Vue.component('card', {
             </div>
             <div class="form-group">
                 <label>Описание задачи</label>
-                <textarea v-model="redactedDescription = card.description"></textarea>
+                <textarea v-model="redactedDescription"></textarea>
             </div>
             <div class="form-group">
                 <label>Дэдлайн</label>
-                <input type="date" v-model="redactedDeadline = card.deadline">
+                <input type="date" v-model="redactedDeadline">
             </div>
             <button type="submit" class="btn btn-primary">Сохранить задачу</button>
             <button type="button" class="btn btn-secondary" v-on:click="close">Сбросить и закрыть</button>
@@ -182,6 +182,9 @@ Vue.component('create-form', {
                 return;
             }
             this.$emit('create-card', this.card);
+            this.card.name = "";
+            this.card.description = "";
+            this.card.deadline = null;
         },
         changeIsActive() {
             this.isActive = !this.isActive;
@@ -251,7 +254,8 @@ let app = new Vue({
             let card = this.getCard(cardId);
             card.column_id += direction
             if (card.column_id === 3) {
-                card.is_expired = Date.now() > card.deadline;
+                console.log(Date.now(), card.deadline, Date.now() > card.deadline)
+                card.is_expired = Date.now() > new Date(card.deadline);
                 card.message = null
             }
             this.saveCards()
