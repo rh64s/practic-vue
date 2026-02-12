@@ -18,7 +18,7 @@ Vue.component('card', {
         },
     },
     template: `
-<div class="card">
+<div class="card" :class="{success: !card.is_expired}">
     <div v-if="currentModalMode === 0">
         <div class="card-header">
             <p class="card-name">{{ card.name }}</p>
@@ -32,18 +32,18 @@ Vue.component('card', {
                 <p class="card-message warning">{{card.message}}</p>
             </div>
         </div>
-        <div class="card-controller">
-            <div v-if="card.column_id < 4">
+        <div v-if="card.column_id < 3" class="card-controller">
+            <div>
                 <button class="card-button-delete" v-on:click="deleteCard">Удалить</button>
                 <button class="card-button-change" v-on:click="currentModalMode = 1">Изменить</button>
             </div>
             <div>
                 <button class="card-button-move" v-if="card.column_id > 1 && card.column_id < 4" v-on:click="moveCard(-1)"><-</button>
-                <button class="card-button-move" v-if="card.column_id < 4" v-on:click="moveCard(+1)">-></button>
+                <button class="card-button-move" v-if="card.column_id < 3" v-on:click="moveCard(+1)">-></button>
             </div>
         </div>
     </div>
-    <div v-else-if="currentModalMode === 1">
+    <div v-else-if="currentModalMode === 1 && card.column_id !== 3">
         <form @submit.prevent="saveCard">
             <div class="form-group">
                 <label>Название задачи</label>
@@ -64,7 +64,7 @@ Vue.component('card', {
             <p class="error" v-for="error in errors">{{error}}</p>
         </div>
     </div>
-    <div v-else-if="currentModalMode === 2">
+    <div v-else-if="currentModalMode === 2 && card.column_id !== 3">
         <form>
             <div class="form-group">
                 <label>Введите причину перевода</label>
@@ -77,7 +77,6 @@ Vue.component('card', {
             <p class="error" v-for="error in errors">{{error}}</p>
         </div>
     </div>
-</div>
 </div>`,
     methods: {
         moveCard(direction) { 
@@ -239,7 +238,8 @@ let app = new Vue({
                 created_at: Date.now(),
                 updated_at: null,
                 message: null,
-                column_id: 0
+                column_id: 0,
+                is_expired: false
             })
             this.saveCards()
             this.cards = [...this.cards];
@@ -248,7 +248,12 @@ let app = new Vue({
             return this.cards.find((card) => card.id === cardId);
         },
         moveCard(cardId, direction) {
-            this.getCard(cardId).column_id += direction;
+            let card = this.getCard(cardId);
+            card.column_id += direction
+            if (card.column_id === 3) {
+                card.is_expired = Date.now() > card.deadline;
+                card.message = null
+            }
             this.saveCards()
         },
         saveCards() {
