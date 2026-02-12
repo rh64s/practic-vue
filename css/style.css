@@ -1,5 +1,5 @@
 /* style.css - Красочная и анимированная канбан-доска */
-/* ИСПРАВЛЕННАЯ ВЕРСИЯ */
+/* ПОЛНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ */
 
 /* Импорт современных шрифтов */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
@@ -10,12 +10,16 @@
     --gradient-success: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
     --gradient-warning: linear-gradient(135deg, #fad0c4 0%, #ff9a9e 100%);
     --gradient-danger: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-expired: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+    --gradient-success-card: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
     --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
     --gradient-column: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(245,247,250,0.95) 100%);
     --shadow-sm: 0 5px 15px rgba(0,0,0,0.08);
     --shadow-md: 0 8px 25px rgba(0,0,0,0.1);
     --shadow-lg: 0 15px 35px rgba(0,0,0,0.1);
     --shadow-hover: 0 20px 40px rgba(102,126,234,0.15);
+    --shadow-expired: 0 5px 15px rgba(245,101,101,0.2);
+    --shadow-success: 0 5px 15px rgba(72,187,120,0.2);
     --border-radius-sm: 12px;
     --border-radius-md: 18px;
     --border-radius-lg: 25px;
@@ -133,7 +137,6 @@ h1::before {
     overflow-x: auto;
     overflow-y: visible;
     min-width: 0;
-    height: fit-content;
 }
 
 @keyframes fadeInScale {
@@ -166,7 +169,6 @@ h1::before {
     display: flex;
     flex-direction: column;
     height: fit-content;
-    max-height: 1500px;
 }
 
 .column:nth-child(1) { animation-delay: 0.1s; }
@@ -214,9 +216,10 @@ h1::before {
     display: flex;
     align-items: center;
     gap: 10px;
-    white-space: wrap;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .column-title::before {
@@ -242,7 +245,7 @@ h1::before {
     scrollbar-width: thin;
     scrollbar-color: #764ba2 #f0f0f0;
     flex: 1 1 auto;
-    min-height: 300px;
+    min-height: 200px;
 }
 
 .cards::-webkit-scrollbar {
@@ -259,6 +262,7 @@ h1::before {
     border-radius: 10px;
 }
 
+/* ===== СТИЛИ ДЛЯ КАРТОЧЕК ===== */
 .card {
     background: var(--gradient-card);
     border-radius: var(--border-radius-md);
@@ -272,6 +276,7 @@ h1::before {
     width: 100%;
     word-wrap: break-word;
     word-break: break-word;
+    border-left: 6px solid #a0aec0;
 }
 
 @keyframes cardAppear {
@@ -285,16 +290,78 @@ h1::before {
     }
 }
 
-.card:hover {
-    transform: translateY(-5px) scale(1.01);
-    box-shadow: var(--shadow-hover);
-    border-color: transparent;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+/* СТИЛИ ДЛЯ ПРОСРОЧЕННЫХ КАРТОЧЕК (expired) */
+.card.expired {
+    background: var(--gradient-expired);
+    border-left: 6px solid #f56565;
+    border-color: #fc8181;
+    animation: expiredPulse 2s ease-in-out infinite;
 }
 
+.card.expired::before {
+    content: '⚠️ ПРОСРОЧЕНО ⚠️';
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #c53030;
+    background: rgba(255,255,255,0.95);
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(245,101,101,0.3);
+    animation: blink 1.5s ease-in-out infinite;
+    letter-spacing: 1px;
+    z-index: 2;
+    white-space: nowrap;
+}
+
+.card.expired::after {
+    content: '⌛';
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    font-size: 24px;
+    opacity: 0.2;
+    animation: spin 4s linear infinite;
+}
+
+.card.expired .card-name {
+    color: #c53030;
+    font-weight: 700;
+}
+
+.card.expired .card-deadline {
+    color: #c53030;
+    font-weight: 700;
+    background: rgba(254,178,178,0.3);
+    padding: 6px 12px;
+    border-radius: 15px;
+    border: 1px solid rgba(245,101,101,0.3);
+}
+
+.card.expired .card-deadline::before {
+    content: '⚠️';
+    animation: shake 0.5s ease-in-out infinite;
+}
+
+.card.expired .card-description {
+    background: rgba(255,255,255,0.8);
+    border-left: 3px solid #f56565;
+}
+
+.card.expired:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 15px 35px rgba(245,101,101,0.3);
+    background: linear-gradient(135deg, #fff0f0 0%, #ffc5c5 100%);
+}
+
+/* СТИЛИ ДЛЯ УСПЕШНЫХ/АКТИВНЫХ КАРТОЧЕК (success) */
 .card.success {
+    background: var(--gradient-success-card);
     border-left: 6px solid #48bb78;
-    background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+    border-color: #68d391;
+    animation: successGlow 3s ease-in-out infinite;
 }
 
 .card.success::after {
@@ -302,27 +369,139 @@ h1::before {
     position: absolute;
     top: 10px;
     right: 15px;
-    font-size: 20px;
+    font-size: 22px;
     color: #48bb78;
-    animation: checkmark 0.5s ease-out;
+    animation: checkmarkBounce 2s ease-in-out infinite;
+    background: rgba(72,187,120,0.15);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(72,187,120,0.2);
 }
 
-@keyframes checkmark {
+.card.success::before {
+    content: '✨';
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    font-size: 22px;
+    opacity: 0.4;
+    animation: sparkle 2.5s ease-in-out infinite;
+}
+
+.card.success .card-name {
+    color: #276749;
+    font-weight: 700;
+}
+
+.card.success .card-deadline {
+    color: #276749;
+    background: rgba(104,211,145,0.2);
+    padding: 6px 12px;
+    border-radius: 15px;
+    border: 1px solid rgba(72,187,120,0.3);
+}
+
+.card.success .card-deadline::before {
+    content: '✅';
+}
+
+.card.success .card-description {
+    background: rgba(255,255,255,0.8);
+    border-left: 3px solid #48bb78;
+}
+
+.card.success:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 15px 35px rgba(72,187,120,0.3);
+    background: linear-gradient(135deg, #ffffff 0%, #dcffe4 100%);
+}
+
+/* Анимации для expired */
+@keyframes expiredPulse {
+    0%, 100% {
+        box-shadow: 0 5px 15px rgba(245,101,101,0.2);
+        border-left-color: #f56565;
+    }
+    50% {
+        box-shadow: 0 10px 30px rgba(245,101,101,0.4);
+        border-left-color: #fc8181;
+    }
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+        background: rgba(255,255,255,1);
+        box-shadow: 0 4px 15px rgba(245,101,101,0.4);
+    }
+}
+
+@keyframes spin {
     from {
-        opacity: 0;
-        transform: scale(0) rotate(-180deg);
+        transform: rotate(0deg);
     }
     to {
-        opacity: 1;
-        transform: scale(1) rotate(0);
+        transform: rotate(360deg);
     }
 }
 
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+/* Анимации для success */
+@keyframes successGlow {
+    0%, 100% {
+        box-shadow: 0 5px 15px rgba(72,187,120,0.2);
+        border-left-color: #48bb78;
+    }
+    50% {
+        box-shadow: 0 10px 30px rgba(72,187,120,0.4);
+        border-left-color: #68d391;
+    }
+}
+
+@keyframes checkmarkBounce {
+    0%, 100% {
+        transform: scale(1);
+        background: rgba(72,187,120,0.15);
+    }
+    50% {
+        transform: scale(1.15);
+        background: rgba(72,187,120,0.25);
+    }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0.3;
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: rotate(180deg) scale(1.3);
+    }
+}
+
+/* Общие стили для содержимого карточек */
 .card-header {
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 1px dashed #e2e8f0;
     width: 100%;
+    padding-right: 50px;
 }
 
 .card-name {
@@ -332,9 +511,10 @@ h1::before {
     color: #2d3748;
     position: relative;
     display: inline-block;
-    max-width: calc(100% - 30px);
+    max-width: 100%;
     word-wrap: break-word;
     word-break: break-word;
+    padding-right: 5px;
 }
 
 .card-name::after {
@@ -354,15 +534,16 @@ h1::before {
 .card-info {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
+    padding-right: 40px;
 }
 
 .card-description {
     color: #4a5568;
     line-height: 1.6;
     font-size: 14px;
-    padding: 10px;
+    padding: 12px;
     background: rgba(247,250,252,0.7);
     border-radius: 8px;
     border-left: 3px solid #667eea;
@@ -376,26 +557,29 @@ h1::before {
     color: #718096;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
     word-wrap: break-word;
     word-break: break-word;
+    padding: 4px 8px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
 .card-created_at::before {
     content: '🕐';
-    font-size: 12px;
+    font-size: 13px;
     flex-shrink: 0;
 }
 
 .card-deadline::before {
     content: '⏰';
-    font-size: 12px;
+    font-size: 13px;
     flex-shrink: 0;
 }
 
 .card-message {
     background: var(--gradient-warning);
-    padding: 12px;
+    padding: 12px 15px;
     border-radius: 8px;
     color: #744210;
     font-size: 13px;
@@ -405,12 +589,8 @@ h1::before {
     word-break: break-word;
     overflow-wrap: break-word;
     width: 100%;
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+    border-left: 4px solid #ecc94b;
+    font-weight: 500;
 }
 
 .card-message.warning {
@@ -513,7 +693,7 @@ h1::before {
     border-top: 1px solid #e2e8f0;
     width: 100%;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
 .card-controller > div {
@@ -526,13 +706,14 @@ h1::before {
 .create-form {
     background: white;
     border-radius: var(--border-radius-md);
-    padding: 20px;
+    padding: 25px;
     margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
     animation: formAppear 0.4s ease-out;
     width: 100%;
     word-wrap: break-word;
     word-break: break-word;
+    border: 1px solid rgba(102,126,234,0.2);
 }
 
 @keyframes formAppear {
@@ -554,7 +735,7 @@ h1::before {
 .form-group label {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
     margin-bottom: 8px;
     font-weight: 600;
     color: #4a5568;
@@ -565,7 +746,7 @@ h1::before {
 
 .form-group label::before {
     content: '✨';
-    font-size: 12px;
+    font-size: 14px;
     flex-shrink: 0;
 }
 
@@ -651,7 +832,7 @@ textarea {
 }
 
 /* Дополнительные анимированные элементы */
-.canban::before {
+.canban::after {
     content: '⬅️ ➡️';
     position: fixed;
     bottom: 30px;
@@ -679,16 +860,13 @@ textarea {
 @media (max-width: 1200px) {
     .canban {
         flex-wrap: wrap;
+        justify-content: center;
     }
 
     .column {
-        flex: 0 1 calc(50% - 15px);
+        flex: 0 1 calc(50% - 20px);
         min-width: 300px;
         max-width: 100%;
-    }
-
-    h1 {
-        font-size: 40px;
     }
 }
 
@@ -696,6 +874,7 @@ textarea {
     .column {
         flex: 0 1 100%;
         min-width: 100%;
+        max-width: 100%;
     }
 
     body {
@@ -708,38 +887,146 @@ textarea {
 
     h1 {
         font-size: 32px;
+        margin-bottom: 30px;
     }
 
     h1::before {
-        left: -50px;
-        font-size: 40px;
+        left: -45px;
+        font-size: 35px;
     }
 
     .card-controller {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
     }
 
     .card-controller > div {
         width: 100%;
         justify-content: space-between;
     }
+
+    .card.expired::before {
+        white-space: normal;
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+
+    .card.success::after {
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+    }
 }
 
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    h1::before {
+        left: -40px;
+        font-size: 30px;
+    }
+
+    .column {
+        padding: 20px 15px;
+        min-width: 260px;
+    }
+
+    .btn,
+    .card-button-delete,
+    .card-button-change {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .card-button-move {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .card-info {
+        padding-right: 35px;
+    }
+
+    .card.expired::before {
+        position: static;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+
+    .card.success::after {
+        position: static;
+        margin-bottom: 10px;
+        display: inline-flex;
+    }
+}
+
+/* СПЕЦИАЛЬНЫЕ СТИЛИ ДЛЯ ШИРОКИХ ЭКРАНОВ (1900px+) */
 @media (min-width: 1900px) {
     .canban {
         gap: 40px;
         justify-content: center;
+        overflow-x: visible;
     }
 
     .column {
-        min-width: 350px;
+        min-width: 380px;
         max-width: 450px;
-        flex: 0 1 350px;
+        flex: 0 1 380px;
+        max-height: 900px;
     }
 
     .cards {
-        max-height: 700px;
+        max-height: 750px;
+        gap: 25px;
+    }
+
+    .card {
+        padding: 25px;
+    }
+
+    .card-name {
+        font-size: 20px;
+    }
+
+    .card-description {
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .card-created_at,
+    .card-deadline {
+        font-size: 13px;
+    }
+
+    .btn,
+    .card-button-delete,
+    .card-button-change {
+        padding: 12px 24px;
+        font-size: 15px;
+    }
+
+    .create-form {
+        padding: 30px;
+    }
+
+    h1 {
+        font-size: 56px;
+    }
+
+    h1::before {
+        font-size: 60px;
+        left: -70px;
     }
 }
 
@@ -762,15 +1049,10 @@ textarea {
 
 @keyframes cardGlow {
     0%, 100% { box-shadow: var(--shadow-sm); }
-    50% { box-shadow: 0 5px 25px rgba(102,126,234,0.2); }
+    50% { box-shadow: 0 5px 25px rgba(102,126,234,0.15); }
 }
 
-/* Конфетти эффект при создании карточки */
-@keyframes confetti {
-    0% { transform: translateY(0) rotate(0); opacity: 1; }
-    100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
-}
-
+/* Эффект при создании карточки */
 .create-form button[type="submit"]:active {
     animation: clickPop 0.3s ease-out;
 }
@@ -782,11 +1064,11 @@ textarea {
 }
 
 /* Красивые градиенты для фона карточек */
-.card:nth-child(even) {
+.card:not(.expired):not(.success):nth-child(even) {
     background: linear-gradient(135deg, #ffffff 0%, #f8f0ff 100%);
 }
 
-.card:nth-child(odd) {
+.card:not(.expired):not(.success):nth-child(odd) {
     background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
 }
 
@@ -795,25 +1077,57 @@ textarea {
 .card-description,
 .card-message,
 .column-title,
-p {
+p,
+span,
+label {
     max-width: 100%;
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
 }
 
-/* Фикс для кнопок на мобильных */
-@media (max-width: 480px) {
-    .btn,
-    .card-button-delete,
-    .card-button-change {
-        padding: 8px 12px;
-        font-size: 12px;
-    }
+/* Стили для пустых колонок */
+.cards:empty::after {
+    content: '✨ Нет задач ✨';
+    display: block;
+    text-align: center;
+    padding: 30px 20px;
+    color: #718096;
+    font-size: 14px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 12px;
+    border: 2px dashed #cbd5e0;
+    animation: pulse 3s ease infinite;
+}
 
-    .card-button-move {
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
-    }
+/* Дополнительные улучшения для карточек */
+.card {
+    position: relative;
+}
+
+.card:hover {
+    z-index: 10;
+}
+
+/* Фикс для переполнения текста в кнопках */
+.btn,
+.card-button-delete,
+.card-button-change {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Анимация загрузки */
+@keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Стили для выделения важных элементов */
+.column-title span {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
 }

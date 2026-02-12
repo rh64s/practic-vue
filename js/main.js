@@ -18,7 +18,7 @@ Vue.component('card', {
         },
     },
     template: `
-<div class="card" :class="{expired: card.is_expired; success: !card.is_expired}">
+<div class="card" :class="{ expired: card.is_expired, success: !card.is_expired }">
     <div v-if="currentModalMode === 0">
         <div class="card-header">
             <p class="card-name">{{ card.name }}</p>
