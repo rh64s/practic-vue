@@ -14,21 +14,18 @@ Vue.component('card', {
         <p class="card-deadline">Дедлайн: {{new Date(card.deadline).toLocaleString('ru-RU')}}</p>
     </div>
     <div class="card-controller">
-        <button v-if="card.column_id < 4" v-on:click="moveCardForward">-></button>
-        <button v-if="card.column_id > 0" v-on:click="moveCardBack"><-</button>
+        <div v-if="card.column_id < 4">
+            <button class="card-button-delete" v-on:click="deleteCard">Удалить</button>
+        </div>
+        <div>
+            <button class="card-button-move" v-if="card.column_id > 1" v-on:click="moveCard(-1)"><-</button>
+            <button class="card-button-move" v-if="card.column_id < 4" v-on:click="moveCard(+1)">-></button>
+        </div>
     </div>
 </div>`,
     methods: {
-        moveCardForward(card) {
-            console.log("двиг +")
-            card.column_id++;
-            eventBus.$emit('save')
-        },
-        moveCardBack(card) {
-            console.log("двиг -")
-            card.column_id--;
-            eventBus.$emit('save')
-        }
+        moveCard(direction) { eventBus.$emit('move-card', this.card.id, direction); },
+        deleteCard() {eventBus.$emit('delete-card', this.card.id); },
     }
 })
 
@@ -110,7 +107,6 @@ Vue.component('column', {
     },
     template: `
 <div class="column">
-    
     <p class="column-title">{{ this.column.name }}</p>
     <div class="cards">
         <create-form v-if="index === 0" @create-card="createCard"></create-form>
@@ -148,8 +144,23 @@ let app = new Vue({
                 message: null,
                 column_id: 0
             })
-            localStorage.setItem("cards", JSON.stringify(this.cards))
+            this.saveCards()
             this.cards = [...this.cards];
+        },
+        moveCard(cardId, direction) {
+            this.cards[cardId].column_id += direction;
+            this.saveCards()
+        },
+        saveCards() {
+            localStorage.setItem("cards", JSON.stringify(this.cards))
+        },
+        deleteCard(cardId) {
+            this.cards.pop(cardId);
+            let index = 0;
+            this.cards.forEach((card) => {
+                card.id = index++;
+            })
+            this.saveCards()
         }
     },
     computed: {
@@ -163,8 +174,7 @@ let app = new Vue({
     },
     mounted() {
         this.cards = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
-        eventBus.$on('save', function () {
-            localStorage.setItem("cards", JSON.stringify(this.cards));
-        });
+        eventBus.$on('move-card', this.moveCard);
+        eventBus.$on('delete-card', this.deleteCard);
     }
 })
