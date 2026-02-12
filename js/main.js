@@ -4,7 +4,11 @@ Vue.component('card', {
     data() {
         return {
             currentModalMode: 0,
-            errors: []
+            errors: [],
+            redactedName: this.card.name,
+            redactedDescription: this.card.description,
+            redactedDeadline: this.card.deadline,
+            redactedMessage: this.card.message,
         }
     },
     props: {
@@ -31,7 +35,7 @@ Vue.component('card', {
                 <button class="card-button-change" v-on:click="currentModalMode = 1">Изменить</button>
             </div>
             <div>
-                <button class="card-button-move" v-if="card.column_id > 1" v-on:click="moveCard(-1)"><-</button>
+                <button class="card-button-move" v-if="card.column_id > 1 && card.column_id < 4" v-on:click="moveCard(-1)"><-</button>
                 <button class="card-button-move" v-if="card.column_id < 4" v-on:click="moveCard(+1)">-></button>
             </div>
         </div>
@@ -40,18 +44,31 @@ Vue.component('card', {
         <form @submit.prevent="saveCard">
             <div class="form-group">
                 <label>Название задачи</label>
-                <input type="text" v-model="card.name" placeholder="Название">
+                <input type="text" v-model="redactedName" placeholder="Название">
             </div>
             <div class="form-group">
                 <label>Описание задачи</label>
-                <textarea v-model="card.description"></textarea>
+                <textarea v-model="redactedDescription = card.description"></textarea>
             </div>
             <div class="form-group">
                 <label>Дэдлайн</label>
-                <input type="date" v-model="card.deadline">
+                <input type="date" v-model="redactedDeadline = card.deadline">
             </div>
             <button type="submit" class="btn btn-primary">Сохранить задачу</button>
-            <button type="button" class="btn btn-secondary" v-on:click="currentModalMode = 0">Закрыть</button>
+            <button type="button" class="btn btn-secondary" v-on:click="close">Сбросить и закрыть</button>
+        </form>
+        <div class="errors" v-if="errors.length > 0">
+            <p class="error" v-for="error in errors">{{error}}</p>
+        </div>
+    </div>
+    <div v-else-if="currentModalMode === 2">
+        <form>
+            <div class="form-group">
+                <label>Введите причину перевода</label>
+                <input type="text" v-model="redactedMessage" placeholder="Название">
+            </div>
+            <button type="submit" class="btn btn-primary" v-on:click="saveCard">Сохранить и перевести</button>
+            <button type="button" class="btn btn-secondary" v-on:click="close">Отменить и закрыть</button>
         </form>
         <div class="errors" v-if="errors.length > 0">
             <p class="error" v-for="error in errors">{{error}}</p>
@@ -60,26 +77,39 @@ Vue.component('card', {
 </div>
 </div>`,
     methods: {
-        moveCard(direction) { eventBus.$emit('move-card', this.card.id, direction); },
+        moveCard(direction) { 
+            eventBus.$emit('move-card', this.card.id, direction);
+        },
         deleteCard() {eventBus.$emit('delete-card', this.card.id); },
         saveCard() {
             this.errors = []
-            if (this.card.name === "") {
+            if (this.redactedName === "") {
                 this.errors.push("Введите название задачи")
             }
-            if (this.card.description === "") {
+            if (this.redactedDescription === "") {
                 this.errors.push("Введите описание задачи")
             }
-            if (this.card.deadline === null) {
+            if (this.redactedDeadline === null) {
                 this.errors.push("Укажите дэдлайн!")
-            } else if (new Date(this.card.deadline) < Date.now()) {
+            } else if (new Date(this.redactedDeadline) < Date.now()) {
                 this.errors.push("Дэдлайн не может быть раньше, чем текущее время")
             }
             if(this.errors.length > 0) {
                 return;
             }
             this.currentModalMode = 0;
+            
+            this.card.name = this.redactedName;
+            this.card.description = this.redactedDescription;
+            this.card.deadline = this.redactedDeadline;
             eventBus.$emit('save-card', this.card);
+        },
+        close() {
+            this.redactedName = this.card.name;
+            this.redactedDescription = this.card.description;
+            this.redactedDeadline = this.card.deadline;
+            this.redactedMessage = this.card.message;
+            this.currentModalMode = 0;
         }
     }
 })
