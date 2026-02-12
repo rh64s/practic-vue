@@ -106,7 +106,7 @@ Vue.component('column', {
         },
     },
     template: `
-<div class="column">
+<div class="column"> 
     <p class="column-title">{{ this.column.name }}</p>
     <div class="cards">
         <create-form v-if="index === 0" @create-card="createCard"></create-form>
