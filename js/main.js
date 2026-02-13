@@ -144,10 +144,17 @@ Vue.component('card', {
             }
             this.currentModalMode = 0;
             
-            this.card.name = this.redactedName;
-            this.card.description = this.redactedDescription;
-            this.card.deadline = this.redactedDeadline;
-            eventBus.$emit('save-card', this.card);
+            // this.card.name = this.redactedName;
+            // this.card.description = this.redactedDescription;
+            // this.card.deadline = this.redactedDeadline;
+            let newCard = {
+                id: this.card.id,
+                name: this.redactedName,
+                description: this.redactedDescription,
+                deadline: this.deadline,
+            }
+            eventBus.$emit('save-card', newCard);
+            this.close()
         },
         close() {
             this.redactedName = this.card.name;
@@ -343,6 +350,10 @@ let app = new Vue({
         },
         saveCard(newCard) {
             let card = this.getCard(newCard.id);
+            if (card.name === newCard.name && card.description === newCard.description && card.deadline === newCard.deadline) {
+                this.saveCards()
+                return;
+            }
             card.name = newCard.name;
             card.description = newCard.description;
             card.deadline = newCard.deadline;
