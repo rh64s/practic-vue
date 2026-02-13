@@ -12,6 +12,10 @@
 <body>
 <div id="app">
     <h1>Canban доска</h1>
+    <div class="error-bar" v-if="errormessage.length > 0">
+        <p>{{errormessage}}</p>
+        <button v-on:click="closeErrorMessage">X</button>
+    </div>
     <div class="canban">
         <column v-for="(column, index) in columns" :key="index" :cards="cardsToColumns[index]" :column="column" :index="index" @create-card="createCard"></column>
     </div>

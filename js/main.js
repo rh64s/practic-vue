@@ -1,5 +1,33 @@
 let eventBus = new Vue()
 
+Vue.component('task', {
+    props: {
+        task: {
+            type: Object,
+            required: true
+        },
+        index: {
+            type: Number,
+            required: true
+        },
+        isLocked: {
+            type: Boolean,
+            default: false
+        }
+    },
+    template: `
+<div class="card-tasks-task">
+    <p>{{ task.name }}</p>
+    <input type="checkbox" v-model="task.isChecked" v-on:change="sendTaskStatus" :disabled="isLocked">    
+</div>
+    `,
+    methods: {
+        sendTaskStatus() {
+            this.$emit('save')
+        }
+    }
+})
+
 Vue.component('card', {
     data() {
         return {
@@ -28,9 +56,15 @@ Vue.component('card', {
             <p class="card-created_at">Создана: {{new Date(card.created_at).toLocaleString('ru-RU')}}</p>
             <p class="card-created_at" v-if="card.updated_at != null">Изменена: {{new Date(card.updated_at).toLocaleString('ru-RU')}}</p>
             <p class="card-deadline">Дедлайн: {{new Date(card.deadline).toLocaleString('ru-RU')}}</p>
-            <div v-if="card.messages.length > 0">
+            <div v-if="card.messages !== null && card.messages.length > 0">
                 <p v-for="message in card.messages" class="card-message warning">{{message}}</p>
             </div>
+        </div>
+        <div class="card-tasks">
+            <task v-for="(task, taskIndex) in card.tasks" :key="taskIndex" 
+            :task="task" :index="taskIndex" :isLocked="isLocked"
+            @save="saveFast"></task>
+            </task>
         </div>
         <div v-if="card.column_id < 3" class="card-controller">
             <div>
@@ -121,6 +155,14 @@ Vue.component('card', {
             this.redactedDeadline = this.card.deadline;
             this.redactedMessage = "";
             this.currentModalMode = 0;
+        },
+        saveFast() {
+            eventBus.$emit('save-all-cards')
+        },
+    },
+    computed: {
+        isLocked() {
+            return this.card.column_id === 3;
         }
     }
 })
@@ -133,6 +175,7 @@ Vue.component('create-form', {
                 name: "",
                 description: "",
                 deadline: null,
+                tasks: [],
             },
             errors: []
         }
@@ -156,7 +199,15 @@ Vue.component('create-form', {
                 <label>Дэдлайн</label>
                 <input type="date" v-model="card.deadline">
             </div>
-            <button type="submit" class="btn btn-primary">Создать задачу</button>
+            <div class="form-group card-add-tasks">
+                <button v-on:click="addTask" type="button">Добавить задачу</button>
+                <div v-if="card.tasks.length > 0">
+                    <div class="task-input-group" v-for="(task, taskIndex) in card.tasks">
+                        <input type="text" v-model="card.tasks[taskIndex].name">
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Создать карточку</button>
             <button type="button" class="btn btn-secondary" v-on:click="changeIsActive">Закрыть</button>
         </form>
         <div class="errors" v-if="errors.length > 0">
@@ -178,6 +229,12 @@ Vue.component('create-form', {
             } else if (new Date(this.card.deadline) < Date.now()) {
                 this.errors.push("Дэдлайн не может быть раньше, чем текущее время")
             }
+            if (this.card.tasks.length === 0) {
+                this.errors.push("Необходимо добавить хотя-бы одну задачу")
+            }
+            if (this.card.tasks.filter(task => task.length === 0).length > 0) {
+                this.errors.push("Нельзя добавить пустые задачи в карточку")
+            }
             if(this.errors.length > 0) {
                 return;
             }
@@ -185,12 +242,20 @@ Vue.component('create-form', {
             this.card.name = "";
             this.card.description = "";
             this.card.deadline = null;
+            this.card.tasks = [];
+        },
+        addTask() {
+            this.card.tasks.push({
+                name: "",
+                isChecked: false,
+            })
         },
         changeIsActive() {
             this.isActive = !this.isActive;
             this.card.name = "";
             this.card.description = "";
             this.card.deadline = null;
+            this.card.tasks = [];
         }
     }
 })
@@ -229,7 +294,8 @@ let app = new Vue({
             { name: 'В работе' },
             { name: 'Тестирование' },
             { name: 'Выполненные задачи' },
-        ]
+        ],
+        errormessage: "",
     },
     methods: {
         createCard(card) {
@@ -242,7 +308,8 @@ let app = new Vue({
                 updated_at: null,
                 messages: [],
                 column_id: 0,
-                is_expired: false
+                is_expired: false,
+                tasks: card.tasks,
             })
             this.saveCards()
             this.cards = [...this.cards];
@@ -250,18 +317,29 @@ let app = new Vue({
         getCard(cardId) {
             return this.cards.find((card) => card.id === cardId);
         },
+        isAllTasksCompleted(card) {
+            return card.tasks.filter(task => task.isChecked).length === card.tasks.length;
+        },
         moveCard(cardId, direction) {
             let card = this.getCard(cardId);
-            card.column_id += direction
-            if (card.column_id === 3) {
-                console.log(Date.now(), card.deadline, Date.now() > card.deadline)
-                card.is_expired = Date.now() > new Date(card.deadline);
-                card.message = []
+            let nextColumn = card.column_id + direction;
+            if (nextColumn === 3) {
+                if (!this.isAllTasksCompleted(card)) {
+                    this.errormessage = "Вы не можете переместить карточку, пока в ней еще есть задачи!"
+                    this.saveCards()
+                    return
+                } else {
+                    console.log(Date.now(), card.deadline, Date.now() > card.deadline);
+                    card.is_expired = Date.now() > new Date(card.deadline);
+                    card.messages = [];
+                }
             }
+            card.column_id = nextColumn;
             this.saveCards()
         },
         saveCards() {
-            localStorage.setItem("cards", JSON.stringify(this.cards))
+            localStorage.setItem("cards", JSON.stringify(this.cards));
+            this.cards = [...this.cards];
         },
         saveCard(newCard) {
             let card = this.getCard(newCard.id);
@@ -269,15 +347,18 @@ let app = new Vue({
             card.description = newCard.description;
             card.deadline = newCard.deadline;
             card.updated_at = Date.now();
-            this.saveCards()
+            this.saveCards();
         },
         deleteCard(cardId) {
             this.cards = this.cards.filter(card => card.id !== cardId);
-            this.saveCards()
+            this.saveCards();
         },
         attachMessage(cardId, message) {
             this.getCard(cardId).messages.push(message);
             this.saveCards();
+        },
+        closeErrorMessage(){
+            this.errormessage = "";
         }
     },
     computed: {
@@ -294,6 +375,7 @@ let app = new Vue({
         eventBus.$on('move-card', this.moveCard);
         eventBus.$on('delete-card', this.deleteCard);
         eventBus.$on('save-card', this.saveCard);
-        eventBus.$on('attach-message', this.attachMessage)
+        eventBus.$on('attach-message', this.attachMessage);
+        eventBus.$on('save-all-cards', this.saveCards);
     }
 })
