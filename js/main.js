@@ -151,7 +151,7 @@ Vue.component('card', {
                 id: this.card.id,
                 name: this.redactedName,
                 description: this.redactedDescription,
-                deadline: this.deadline,
+                deadline: this.redactedDeadline,
             }
             eventBus.$emit('save-card', newCard);
             this.close()
