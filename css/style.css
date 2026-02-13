@@ -983,11 +983,9 @@ textarea {
         min-width: 380px;
         max-width: 450px;
         flex: 0 1 380px;
-        max-height: 900px;
     }
 
     .cards {
-        max-height: 750px;
         gap: 25px;
     }
 
