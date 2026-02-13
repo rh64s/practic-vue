@@ -68,7 +68,7 @@ Vue.component('card', {
         </div>
         <div v-if="card.column_id < 3" class="card-controller">
             <div>
-                <button class="card-button-delete" v-on:click="deleteCard">Удалить</button>
+                <button v-if="card.column_id === 0" class="card-button-delete" v-on:click="deleteCard">Удалить</button>
                 <button class="card-button-change" v-on:click="currentModalMode = 1">Изменить</button>
             </div>
             <div>
