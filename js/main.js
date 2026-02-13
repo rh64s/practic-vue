@@ -28,8 +28,8 @@ Vue.component('card', {
             <p class="card-created_at">Создана: {{new Date(card.created_at).toLocaleString('ru-RU')}}</p>
             <p class="card-created_at" v-if="card.updated_at != null">Изменена: {{new Date(card.updated_at).toLocaleString('ru-RU')}}</p>
             <p class="card-deadline">Дедлайн: {{new Date(card.deadline).toLocaleString('ru-RU')}}</p>
-            <div v-if="card.message !== null && card.message.length > 0">
-                <p class="card-message warning">{{card.message}}</p>
+            <div v-if="card.messages.length > 0">
+                <p v-for="message in card.messages" class="card-message warning">{{message}}</p>
             </div>
         </div>
         <div v-if="card.column_id < 3" class="card-controller">
@@ -240,7 +240,7 @@ let app = new Vue({
                 deadline: card.deadline,
                 created_at: Date.now(),
                 updated_at: null,
-                message: null,
+                messages: [],
                 column_id: 0,
                 is_expired: false
             })
@@ -256,7 +256,7 @@ let app = new Vue({
             if (card.column_id === 3) {
                 console.log(Date.now(), card.deadline, Date.now() > card.deadline)
                 card.is_expired = Date.now() > new Date(card.deadline);
-                card.message = null
+                card.message = []
             }
             this.saveCards()
         },
@@ -276,7 +276,7 @@ let app = new Vue({
             this.saveCards()
         },
         attachMessage(cardId, message) {
-            this.getCard(cardId).message = message
+            this.getCard(cardId).messages.push(message);
             this.saveCards();
         }
     },
