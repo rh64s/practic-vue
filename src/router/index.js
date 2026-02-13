@@ -1,7 +1,7 @@
 import { createWebHistory, createRouter } from 'vue-router'
 
 import HomeView from "@/views/HomeView.vue";
-import Login from '@/components/Login.vue'
+import LoginForm from '@/components/Auth/LoginForm.vue'
 import store from '@/store/index.js'
 
 const ifNotAuthenticated = (to, from, next) => {
@@ -32,7 +32,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: Login,
+      component: LoginForm,
       beforeEnter: ifNotAuthenticated,
     }
   ],
