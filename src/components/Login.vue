@@ -1,15 +1,24 @@
-<script setup>
-import { useLoginDataStore} from "@/stores/loginData.js";
-import { storeToRefs } from 'pinia';
-import {computed} from "vue";
+<script>
+export default {
+  data() {
+    return {
+      username: "",
+      password: "",
+    };
+  },
+  methods: {
+    login() {
+      const userData = {
+        username: this.username,
+        password: this.password,
+      };
 
-const store = useLoginDataStore();
-
-// const username = computed(() => store.username)
-// const password = computed(() => store.password)
-
-const { username, password } = storeToRefs(store);
-const { login } = store;
+      this.$store
+        .dispatch(AUTH_REQUEST, userData)
+        .then(() => this.$router.push('/'))
+    }
+  }
+}
 </script>
 
 <template>
