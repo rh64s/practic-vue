@@ -30,6 +30,8 @@ const loginAction = async () => {
     <hr>
     <button type="submit">Логин</button>
   </form>
+  <RouterLink to="/auth/register">Желаете зарегистрироваться?</RouterLink>
+
 </template>
 
 <style scoped>

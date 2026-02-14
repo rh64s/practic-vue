@@ -22,6 +22,10 @@ import CartView from '@/views/CartView.vue'
 //   next('/login')
 // }
 
+function checkToken() {
+  return localStorage.getItem('token') !== null || localStorage.getItem('token') !== ''
+}
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -56,11 +60,13 @@ const router = createRouter({
       path: '/cart',
       name: 'cart',
       component: CartView,
-      // beforeEnter: (to, from, next) => {
-      //   if (!(localStorage.getItem('token'))) {
-      //     return next('/login')
-      //   }
-      // }
+      beforeEnter: (to, from, next) => {
+        if (checkToken()) {
+          return next({name: 'login'})
+        } else {
+          next()
+        }
+      }
     }
   ],
 })

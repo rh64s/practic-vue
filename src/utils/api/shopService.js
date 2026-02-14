@@ -6,4 +6,7 @@ export const shopService = {
     api.get('products', data).then(response => response.data).then( (data) => {
       return data.data
     }),
+
+  addToCart: (product_id) =>
+    api.post(`cart/${product_id}`, product_id).then(response => response.data)
 }

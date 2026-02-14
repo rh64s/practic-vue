@@ -33,6 +33,7 @@ const registerAction = async () => {
     <hr>
     <button type="submit">Регистрация</button>
   </form>
+  <RouterLink to="/auth/login">У вас есть аккаунт?</RouterLink>
 </template>
 
 <style scoped>

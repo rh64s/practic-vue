@@ -25,10 +25,9 @@ const mergedCart = computed(() => {
 
 <template>
   <h1 class="page-name">Корзина</h1>
-  <div class="cart">
-    <div class="item" v-for="(item, index) in mergedCart" v-bind:key="index">
-      <product-card :product="item" :count="item.count"></product-card>
-    </div>
+  <div class="cart products">
+    <product-card class="item" v-for="(item, index) in mergedCart"
+          v-bind:key="index" :product="item" :count="item.count" />
   </div>
 </template>
 
