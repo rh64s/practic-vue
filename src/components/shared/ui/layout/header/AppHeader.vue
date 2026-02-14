@@ -33,6 +33,7 @@ const handleLogout = async () => {
         <RouterLink to="/">Главная</RouterLink>
         <RouterLink v-if="!isAuth" to="/auth/login">Вход</RouterLink>
         <RouterLink v-if="!isAuth" to="/auth/register">Регистрация</RouterLink>
+        <RouterLink href="#" v-if="isAuth" to="/cart">Корзина</RouterLink>
         <a href="#" v-if="isAuth" @click.prevent="handleLogout">Выйти</a>
       </nav>
     </div>

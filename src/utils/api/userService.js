@@ -26,5 +26,7 @@ export const userService = {
   cart: (data) =>
     api.get('cart', data).then(response => response.data).then( (data) => {
       return data.data
+    }).catch( (error) => {
+      return []
     })
 }

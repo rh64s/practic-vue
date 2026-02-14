@@ -4,6 +4,7 @@ import HomeView from "@/views/HomeView.vue";
 import LoginForm from '@/components/Auth/LoginForm.vue'
 import AuthView from '@/views/AuthView.vue'
 import RegisterForm from '@/components/Auth/RegisterForm.vue'
+import CartView from '@/views/CartView.vue'
 // import store from '@/store/index.js'
 // const ifNotAuthenticated = (to, from, next) => {
 //   if (!store.getters.isAuthenticated) {
@@ -50,6 +51,16 @@ const router = createRouter({
           redirect: '/login',
         }
       ]
+    },
+    {
+      path: '/cart',
+      name: 'cart',
+      component: CartView,
+      // beforeEnter: (to, from, next) => {
+      //   if (!(localStorage.getItem('token'))) {
+      //     return next('/login')
+      //   }
+      // }
     }
   ],
 })

@@ -20,5 +20,5 @@ export const useUserStore = defineStore('user', () => {
   const cartList = async () => {
     cart.value = await userService.cart()
   }
-  return {token, isAuth, clearToken, setToken}
+  return {token, isAuth, clearToken, setToken, cartList, cart}
 })
