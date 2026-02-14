@@ -12,6 +12,8 @@
   width: 100%;
   min-height: 60vh;
   padding: 10px;
-  background:
+  background: #2c3e50;
+  border: none;
+  border-radius: 20px;
 }
 </style>

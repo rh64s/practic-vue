@@ -9,6 +9,7 @@ const loginInfo = reactive({
 })
 const loginAction = () => {
   cartService.login(loginInfo)
+  console.log("залогинились")
 }
 
 </script>

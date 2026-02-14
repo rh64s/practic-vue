@@ -16,7 +16,7 @@ const registerAction = () => {
 
 <template>
   <form class="login" @submit.prevent="registerAction">
-    <h1>Войти</h1>
+    <h1>Регистрация</h1>
     <label>Ваше ФИО</label>
     <input type="text" required v-model="registerData.fio">
     <label>Ваша почта</label>
