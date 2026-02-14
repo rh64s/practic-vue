@@ -1,35 +1,30 @@
-<script>
-export default {
-  data() {
-    return {
-      username: "",
-      password: "",
-    };
-  },
-  methods: {
-    login() {
-      const userData = {
-        username: this.username,
-        password: this.password,
-      };
+<script setup>
 
-      this.$store
-        .dispatch(AUTH_REQUEST, userData)
-        .then(() => this.$router.push('/'))
-    }
-  }
+import { cartService } from '@/utils/api/cartService.js'
+import { reactive } from 'vue'
+
+const registerData = reactive({
+  fio: '',
+  email: '',
+  password: '',
+})
+const registerAction = () => {
+  cartService.register(registerData)
 }
+
 </script>
 
 <template>
-  <form class="login" @submit.prevent="login">
+  <form class="login" @submit.prevent="registerAction">
     <h1>Войти</h1>
-    <label>Имя пользователя</label>
-    <input type="text" required v-model="username">
+    <label>Ваше ФИО</label>
+    <input type="text" required v-model="registerData.fio">
+    <label>Ваша почта</label>
+    <input type="email" required v-model="registerData.email">
     <label>Пароль</label>
-    <input type="password" required v-model="password">
+    <input type="password" required v-model="registerData.password">
     <hr>
-    <button type="submit">Логин</button>
+    <button type="submit">Регистрация</button>
   </form>
 </template>
 
