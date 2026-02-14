@@ -1,20 +1,19 @@
 import { api } from './api.js'
 import router from '@/router/index.js'
 
-
-export const cartService = {
+export const userService = {
   register: (data) =>
     api.post('signup', data).then(response => response.data).then( (data) => {
-      console.log(response)
       localStorage.setItem('token', JSON.stringify(data.data.user_token))
       router.push('/')
+      return data.data
     }),
 
   login: (data) =>
     api.post('login', data).then(response => response.data).then( (data) => {
-      console.log(response)
       localStorage.setItem('token', JSON.stringify(data.data.user_token))
       router.push('/')
+      return data.data
     }),
 
   logout: (data) =>

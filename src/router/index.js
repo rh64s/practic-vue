@@ -44,6 +44,11 @@ const router = createRouter({
           name: 'register',
           component: RegisterForm
         },
+        {
+          path: '/auth/logout',
+          name: 'logout',
+          redirect: '/login',
+        }
       ]
     }
   ],

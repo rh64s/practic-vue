@@ -1,15 +1,21 @@
 <script setup>
 
-import { cartService } from '@/utils/api/cartService.js'
+import { userService } from '@/utils/api/userService.js'
 import { reactive } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/stores/user.js'
 
 const loginInfo = reactive({
   email: '',
   password: ''
 })
-const loginAction = () => {
-  cartService.login(loginInfo)
-  console.log("залогинились")
+
+const userStore = useUserStore()
+const { token } = storeToRefs(userStore)
+const { setToken } = userStore
+const loginAction = async () => {
+  const response = await userService.login(loginInfo)
+  userStore.setToken(response.user_token)
 }
 
 </script>

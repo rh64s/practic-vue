@@ -1,14 +1,11 @@
 <script setup>
 import { useUserStore } from '@/stores/user.js'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
-// import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 
 const userStore = useUserStore()
 const { token, isAuth } = storeToRefs(userStore)
-// const { isAuth } = computed(() => userStore.isAuth)
-const { clearToken } = userStore
+const { clearToken, setToken } = userStore
 
 const router = useRouter()
 
@@ -23,6 +20,7 @@ const handleLogout = async () => {
   } catch (error) {
     console.error("Cant logout!", error);
     clearToken()
+    router.push({ name: 'login' })
   }
 }
 
@@ -32,9 +30,10 @@ const handleLogout = async () => {
   <header>
     <div class="wrapper">
       <nav>
-        <RouterLink v-if="!isAuth.value" to="/auth/login">Вход</RouterLink>
-        <RouterLink v-if="!isAuth.value" to="/auth/register">Регистрация</RouterLink>
-        <a href="#" v-if="isAuth.value" @click.prevent="handleLogout">Выйти</a>
+        <RouterLink to="/">Главная</RouterLink>
+        <RouterLink v-if="!isAuth" to="/auth/login">Вход</RouterLink>
+        <RouterLink v-if="!isAuth" to="/auth/register">Регистрация</RouterLink>
+        <a href="#" v-if="isAuth" @click.prevent="handleLogout">Выйти</a>
       </nav>
     </div>
   </header>
