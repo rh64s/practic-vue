@@ -4,7 +4,6 @@ import router from '@/router/index.js'
 export const shopService = {
   products: (data) =>
     api.get('products', data).then(response => response.data).then( (data) => {
-      console.log(data)
       return data.data
     }),
 }
